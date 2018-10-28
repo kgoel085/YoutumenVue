@@ -3,9 +3,19 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import VueResource from 'vue-resource';
 
 //Vuex Object instance
 import store from './store/store'
+
+Vue.use(VueResource);
+Vue.http.options.root = ' https://www.googleapis.com/youtube/v3';
+Vue.http.interceptors.push(function(request, next) {
+  request.params['part'] = 'snippet';
+  request.params['key'] = 'AIzaSyDAb-J6VKrrQI8xAahMqBmxV3tfcUqxbZY';
+  
+  next();
+});
 
 Vue.config.productionTip = false
 
