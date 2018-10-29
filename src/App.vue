@@ -37,6 +37,10 @@ export default {
   components:{
     'app-header': Header,
     'app-sidebar': Sidebar
+  },
+  beforeCreate(){
+    //To globally set locations
+    this.$store.dispatch('SET_LOCATIONS');
   }
 }
 </script>

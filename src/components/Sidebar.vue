@@ -4,6 +4,15 @@
             <div class="row">
                 <div class="col-md-12">
                     <ul class="sideMenu">
+                        <!-- Location List -->
+                        <template v-if="locationList.length > 0">
+                            <li>
+                                <select name="" id="" class="form-control" v-model="selectedLocation">
+                                    <option v-for="(location, index) in locationList" :key="index" :value="location.id">{{ location.name }}</option>
+                                </select>
+                            </li>
+                        </template>
+
                         <li>
                             <i class="glyphicon glyphicon-home icon"></i>
                             <a>Home</a>
@@ -36,6 +45,27 @@ export default {
             parentHeight: 0
         }
     },
+    computed:{
+        locationList:{
+            get(){
+                var locationObj = this.$store.getters.GET_LOCATIONS;
+                if(locationObj.length > 0) return locationObj;
+            }
+        },
+        selectedLocation:{
+            get(){
+                return this.$store.getters.GET_SELECTED_LOCATION;
+            },
+            set(value){
+                if(value){
+                    var response = this.locationList.find(element => (element.id == value));
+                    if(response){
+                        this.$store.dispatch('SET_SELECTED_LOCATION', value);
+                    }
+                }
+            }
+        }
+    },
     methods:{
         setHeight(){
             var mainElement = this.$el;
@@ -65,6 +95,7 @@ export default {
 </script>
 
 <style>
+
 #mainSideBar{
     background: #ffffff;
     width:20%;
