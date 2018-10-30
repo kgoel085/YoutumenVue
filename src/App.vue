@@ -10,7 +10,7 @@
 
     <div class="container-fluid" :class="{overlay: sideBar}">
       <!-- Main Content View -->
-      <router-view/>
+      <router-view :key="changedVal"/>
     </div>
 
 
@@ -32,6 +32,9 @@ export default {
     sideBar(){
       //Get Global state of sidear and Show it based on it 
       return this.$store.getters.GET_SIDEBAR;
+    },
+    changedVal(){
+      return this.$store.getters.GET_LAST_GLOBAL_CHANGE;
     }
   },
   components:{

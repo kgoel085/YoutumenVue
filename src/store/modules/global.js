@@ -6,7 +6,8 @@ Vue.use(Vuex);
 const state = {
     sidebarToggle: false,
     locations: [],
-    selectedLocation: 'IN'
+    selectedLocation: 'IN',
+    anyGlobalChanged: null
 };
 
 const getters = {
@@ -36,7 +37,14 @@ const getters = {
     //Returns currently selected location
     'GET_SELECTED_LOCATION':state => {
         return state.selectedLocation;
-    }
+    },
+
+    //Returns last updated global action
+    'GET_LAST_GLOBAL_CHANGE':state => {
+        var str = state.anyGlobalChanged;
+        if(str) return str.split('').sort(function(){return 0.5-Math.random()}).join('');
+        return str;
+    } 
 };
 
 const mutations = {
@@ -53,6 +61,11 @@ const mutations = {
     //Sets value of location selected by user
     'SET_SELECTED_LOCATION':(state, locationVal) => {
         state.selectedLocation = locationVal;
+    },
+
+    //Sets the value of last action performed. Will only trigger for the actions which requires components to be changed again
+    'SET_LAST_GLOBAL_CHANGE':(state, lastAction) => {
+        state.anyGlobalChanged = lastAction;
     }
 };
 
@@ -86,6 +99,7 @@ const actions = {
     //Sets value of location selected by user
     'SET_SELECTED_LOCATION':(context, locationVal) => {
         context.commit('SET_SELECTED_LOCATION', locationVal);
+        context.commit('SET_LAST_GLOBAL_CHANGE', 'SET_SELECTED_LOCATION');
     }
 };
 
