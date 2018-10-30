@@ -30,7 +30,7 @@ export default {
   },
   computed:{
     sideBar(){
-      //GEt Global state of sidear and Show it based on it 
+      //Get Global state of sidear and Show it based on it 
       return this.$store.getters.GET_SIDEBAR;
     }
   },
