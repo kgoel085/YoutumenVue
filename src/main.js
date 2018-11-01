@@ -11,9 +11,9 @@ import store from './store/store'
 Vue.use(VueResource);
 Vue.http.options.root = ' https://www.googleapis.com/youtube/v3';
 Vue.http.interceptors.push(function(request, next) {
-  request.params['part'] = 'snippet';
+  if(!request.params['part']) request.params['part'] = 'snippet';
   request.params['key'] = 'AIzaSyDAb-J6VKrrQI8xAahMqBmxV3tfcUqxbZY';
-  request.params['regionCode'] = store.getters.GET_SELECTED_LOCATION;
+  if(!request.params['regionCode']) request.params['regionCode'] = store.getters.GET_SELECTED_LOCATION;
   
   next();
 });
