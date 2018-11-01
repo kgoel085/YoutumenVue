@@ -82,7 +82,7 @@ const actions = {
             var responseArr = []; 
 
             //Looping through each item and extracting snippet data
-            if(resp.items.length){
+            if(resp.items){
                 resp.items.forEach(function(element) {
                     if(element.snippet){
                     responseArr.push(element.snippet);
