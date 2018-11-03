@@ -5,6 +5,11 @@ import App from './App'
 import router from './router'
 import VueResource from 'vue-resource';
 
+//.env file reader
+import dotenv from 'dotenv';
+dotenv.config();
+
+
 //Vuex Object instance
 import store from './store/store'
 
