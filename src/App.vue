@@ -37,6 +37,11 @@ export default {
       return this.$store.getters.GET_LAST_GLOBAL_CHANGE;
     }
   },
+  watch:{
+    changedVal(value){
+      if(this.sideBar) this.$store.dispatch('SET_SIDEBAR_VIEW', !this.sideBar);
+    }
+  },
   components:{
     'app-header': Header,
     'app-sidebar': Sidebar

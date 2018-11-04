@@ -65,7 +65,8 @@ const mutations = {
 
     //Sets the value of last action performed. Will only trigger for the actions which requires components to be changed again
     'SET_LAST_GLOBAL_CHANGE':(state, lastAction) => {
-        state.anyGlobalChanged = lastAction;
+        var str = lastAction.split('').sort(function(){return 0.5-Math.random()}).join('');
+        state.anyGlobalChanged = str;
     }
 };
 

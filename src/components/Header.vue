@@ -44,14 +44,25 @@
 export default {
     data(){
         return{
-            toggledMenu: false,
-            sideBarState: this.$store.getters.GET_SIDEBAR
+            toggledMenu: false
+        }
+    },
+    computed:{
+        sideBarState:{
+            get(){
+                return this.$store.getters.GET_SIDEBAR;
+            },
+            set(value){
+                this.$store.dispatch('SET_SIDEBAR_VIEW', value);
+                this.toggledMenu = value;
+            }
+           
         }
     },
     watch:{
         //Change Glboal sidebar state to check whetehr to open it or not
         sideBarState(value){
-            this.$store.dispatch('SET_SIDEBAR_VIEW', value);
+            
         }
     }
 }
