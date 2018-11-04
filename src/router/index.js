@@ -8,6 +8,12 @@ const Home = resolve => {
   }, 'Home');
 }
 
+const Trending = resolve => {
+  require.ensure(['../components/Trending.vue'], () => {
+      resolve(require('../components/Trending.vue'));
+  }, 'Trending');
+}
+
 Vue.use(Router)
 
 export default new Router({
@@ -17,6 +23,11 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: Home,
+    },
+    {
+      path: '/trending',
+      name: 'Trending',
+      component: Trending,
     }
   ]
 })
