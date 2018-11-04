@@ -13,14 +13,16 @@
                             </li>
                         </template>
 
-                        <li>
+                        <router-link :to="{name: 'Home'}" tag="li">
                             <i class="glyphicon glyphicon-home icon"></i>
                             <a>Home</a>
-                        </li>
-                        <li>
+                        </router-link>
+
+                        <router-link :to="{name: 'Trending'}" tag="li">
                             <i class="glyphicon glyphicon-fire icon"></i>
                             <a>Trending</a>
-                        </li>
+                        </router-link>
+                        
                         <li>
                             <i class="glyphicon glyphicon-folder-close icon"></i>
                             <a>Subscription</a>
