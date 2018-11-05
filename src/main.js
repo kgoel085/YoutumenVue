@@ -11,12 +11,37 @@ import store from './store/store'
 Vue.use(VueResource);
 Vue.http.options.root = ' https://www.googleapis.com/youtube/v3';
 Vue.http.interceptors.push(function(request, next) {
+  // Start the route progress bar.
+  NProgress.start();
+  
   if(!request.params['part']) request.params['part'] = 'snippet';
   request.params['key'] = 'AIzaSyDAb-J6VKrrQI8xAahMqBmxV3tfcUqxbZY';
   if(!request.params['regionCode']) request.params['regionCode'] = store.getters.GET_SELECTED_LOCATION;
   
-  next();
+  next(resp => {
+    // Complete the animation of the route progress bar.
+    NProgress.done();
+  });
 });
+
+//Router Interceptors
+router.beforeResolve((to, from, next) => {
+  // If this isn't an initial page load.
+  if (to.name) {
+      // Start the route progress bar.
+      NProgress.start()
+  }
+  next();
+})
+
+router.afterEach((to, from) => {
+  var chkSideBar = store.getters.GET_SIDEBAR;
+  if(chkSideBar) store.dispatch('SET_SIDEBAR_VIEW', !chkSideBar);
+
+  // Complete the animation of the route progress bar.
+  NProgress.done()
+})
+
 
 Vue.config.productionTip = false
 
