@@ -49,6 +49,17 @@ export default {
   beforeCreate(){
     //To globally set locations
     this.$store.dispatch('SET_LOCATIONS');
+
+    //Set selected region based on the IP
+    this.$resource('http://ip-api.com/json').query().then(resp => resp.json()).then(response => {
+      var countryCode = response.countryCode;
+      var foundCountry = this.$store.getters.GET_LOCATIONS.find(element => (element.id == countryCode));
+      
+      var selectedCountry = "IN";
+      if(foundCountry) selectedCountry = foundCountry.id;
+
+      this.$store.dispatch('SET_SELECTED_LOCATION', selectedCountry);
+    }, err => {});
   }
 }
 </script>
@@ -60,5 +71,11 @@ export default {
       width: 100%!important;
       position: fixed;
       transition: all 0.5s ease;
+  }
+
+  body { padding-top: 70px; }
+
+  #nprogress .bar {
+    background: #ff0000!important;
   }
 </style>

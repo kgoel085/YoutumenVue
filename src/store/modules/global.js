@@ -6,7 +6,7 @@ Vue.use(Vuex);
 const state = {
     sidebarToggle: false,
     locations: [],
-    selectedLocation: 'IN',
+    selectedLocation: null,
     anyGlobalChanged: null
 };
 
