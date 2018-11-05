@@ -1,7 +1,6 @@
 <template>
     <div class="row">
         <app-video v-for="(video, index) in dataObj.videos" :key="index" :videoObj="video" :videoType="video.type"></app-video>
-        <button @click="callAPi">Getmore Videos</button>
     </div>
     
 </template>
@@ -67,6 +66,19 @@ export default {
     },
     created(){
         this.callAPi();
+    },
+    mounted(){
+        var vm = this;
+
+        //Trigger API Call when user reaches the end of page
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+                vm.callAPi();
+            }
+        });
+    },
+    beforeDestroy(){
+        window.removeEventListener('scroll',  this.callAPi());
     },
     components:{
         'app-video': Video
