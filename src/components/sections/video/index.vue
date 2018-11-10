@@ -6,6 +6,7 @@
 
 <script>
 import videoPreview from './preview.vue';
+import videoPlaylist from './playlist.vue';
 
 export default {
     data(){
@@ -15,7 +16,23 @@ export default {
     },
     computed:{
         selectedComponent(){
-            return (this.videoType !== 'preview') ? '': 'app-preview';
+            var selectedComp = '';
+            var selectedVidType = this.videoType;
+
+            switch(selectedVidType){
+                case 'playlist':
+                    selectedComp = 'app-playlist'
+                break;
+
+                //Default layout
+                case 'preview':
+                default:
+                    selectedComp = 'app-preview'
+                break;
+            }
+
+            
+            return selectedComp;
         }
     },
     props:{
@@ -29,7 +46,8 @@ export default {
         }
     },
     components:{
-        'app-preview': videoPreview
+        'app-preview': videoPreview,
+        'app-playlist': videoPlaylist
     }
 }
 </script>
