@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import VueResource from 'vue-resource';
+import {globalMix} from './helpers/global_mixins.js';
 
 //Vuex Object instance
 import store from './store/store'
@@ -44,6 +45,9 @@ router.afterEach((to, from) => {
 
 
 Vue.config.productionTip = false
+
+//Global Mixins
+Vue.mixin(globalMix);
 
 /* eslint-disable no-new */
 new Vue({
