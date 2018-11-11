@@ -10,10 +10,6 @@ import Video from './sections/video/index.vue';
 export default {
     data(){
         return{
-            apiResponse:{
-                nextPageToken: null,
-                prevPageToken: null
-            },
             dataObj: {
                 categories: [],
                 videos: [],
@@ -21,64 +17,47 @@ export default {
                     total:0,
                     current: 0
                 }
+            },
+            apiArr:{
+                paramsArr: {'chart': 'mostpopular', 'maxResults': 10},
+                endPoint: 'videos',
+                successCallBack: this.getResult,
             }
         }
     },
     methods:{
-        //Init. api call to retrive trending videos
-        callAPi(){
+        getResult(response){
             var vm = this;
 
-            var paramsArr = {'chart': 'mostpopular', 'maxResults': 10};
-            if(vm.apiResponse.nextPageToken){
-                paramsArr.pageToken = vm.apiResponse.nextPageToken;
+            //Check for received videos
+            if(response.items){
+                var respItem = response.items;
+                respItem.forEach(function(element){
+                    if(element.snippet){
+                        var snip = element.snippet;
+
+                        //Get Channel ID
+                        if(snip.channelId && vm.dataObj.categories.length < 5) vm.dataObj.categories.push(snip.channelId);
+
+                        element.snippet.type = 'preview';
+                        vm.dataObj.videos.push(element.snippet);
+                    }
+                });
             }
-           
-            this.$http.get('videos', {params: paramsArr}).then(resp => resp.json()).then(response => {
-                
-                //Check for Page Token
-                if(response.nextPageToken) vm.apiResponse.nextPageToken = response.nextPageToken;
-                if(response.prevPageToken) vm.apiResponse.prevPageToken = response.prevPageToken;
-
-                //Check for Page information
-                if(response.pageInfo){
-                    if(response.pageInfo.totalResults) vm.dataObj.videoCount.total = response.pageInfo.totalResults;
-                    if(response.pageInfo.resultsPerPage) vm.dataObj.videoCount.current += response.pageInfo.resultsPerPage;
-                }
-
-                //Check for received videos
-                if(response.items){
-                    var respItem = response.items;
-                    respItem.forEach(function(element){
-                        if(element.snippet){
-                            var snip = element.snippet;
-
-                            //Get Channel ID
-                            if(snip.channelId && vm.dataObj.categories.length < 5) vm.dataObj.categories.push(snip.channelId);
-
-                            element.snippet.type = 'preview';
-                            vm.dataObj.videos.push(element.snippet);
-                        }
-                    });
-                }
-            });
         }
     },
     created(){
-        this.callAPi();
+        //Defined in Global Mixin
+        this.callAPi(this.apiArr);
     },
     mounted(){
         var vm = this;
 
-        //Trigger API Call when user reaches the end of page
-        window.addEventListener('scroll', () => {
-            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
-                vm.callAPi();
+        window.onscroll = function(ev) {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                vm.callAPi(vm.apiArr);
             }
-        });
-    },
-    beforeDestroy(){
-        window.removeEventListener('scroll',  this.callAPi());
+        };
     },
     components:{
         'app-video': Video
