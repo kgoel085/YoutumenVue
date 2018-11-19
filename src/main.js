@@ -10,18 +10,12 @@ import {globalMix} from './helpers/global_mixins.js';
 import store from './store/store'
 
 Vue.use(VueResource);
-Vue.http.options.root = ' https://www.googleapis.com/youtube/v3';
 Vue.http.interceptors.push(function(request, next) {
-  // Start the route progress bar.
-  NProgress.start();
-  
   if(!request.params['part']) request.params['part'] = 'snippet';
-  request.params['key'] = 'AIzaSyDAb-J6VKrrQI8xAahMqBmxV3tfcUqxbZY';
   if(!request.params['regionCode']) request.params['regionCode'] = store.getters.GET_SELECTED_LOCATION;
   
   next(resp => {
-    // Complete the animation of the route progress bar.
-    NProgress.done();
+
   });
 });
 
@@ -29,25 +23,23 @@ Vue.http.interceptors.push(function(request, next) {
 router.beforeResolve((to, from, next) => {
   // If this isn't an initial page load.
   if (to.name) {
-      // Start the route progress bar.
-      NProgress.start()
+    //Loads the first response for the called component
+    store.dispatch('CALL_API', to.name);
   }
   next();
 })
 
 router.afterEach((to, from) => {
+  //Checks for wether sidebar is open or not
   var chkSideBar = store.getters.GET_SIDEBAR;
   if(chkSideBar) store.dispatch('SET_SIDEBAR_VIEW', !chkSideBar);
-
-  // Complete the animation of the route progress bar.
-  NProgress.done()
 })
 
 
 Vue.config.productionTip = false
 
-//Global Mixins
-Vue.mixin(globalMix);
+//Global Mixins - Currently disabled and using Vuex to manage response
+//Vue.mixin(globalMix);
 
 /* eslint-disable no-new */
 new Vue({
