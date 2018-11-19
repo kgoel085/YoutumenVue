@@ -17,17 +17,18 @@ export default {
                     total:0,
                     current: 0
                 }
-            },
-            apiArr:{
-                paramsArr: {'chart': 'mostpopular', 'maxResults': 10},
-                endPoint: 'videos',
-                successCallBack: this.getResult,
             }
         }
     },
+    computed:{
+        respObj(){
+            return this.$store.getters.GET_CURRENT_API_RESPONSE;
+        }
+    },
     methods:{
-        getResult(response){
+        getResult(respObj){
             var vm = this;
+            var response = respObj.response;
 
             //Check for received videos
             if(response.items){
@@ -46,16 +47,22 @@ export default {
             }
         }
     },
-    created(){
-        //Defined in Global Mixin
-        this.callAPi(this.apiArr);
+    watch:{
+        respObj(obj){
+            if(!obj){
+                this.$store.dispatch('CALL_API', this.$route.name);
+                return false;
+            }
+            this.getResult(obj);
+        }
     },
     mounted(){
         var vm = this;
 
         window.onscroll = function(ev) {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                vm.callAPi(vm.apiArr);
+                //Call API endpoint again for next record
+                vm.$store.dispatch('CALL_API', vm.$route.name);
             }
         };
     },
