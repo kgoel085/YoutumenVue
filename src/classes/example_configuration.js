@@ -7,6 +7,7 @@ export const configArr = {
         },
         'url': 'URL of your API'
     },
+    //Below keys define the parameters that will be send for the selected selection
     'Trending':{
         parameters:{
             params: {'chart': 'mostpopular', 'maxResults': 10},
