@@ -4,6 +4,9 @@ import Vuex from 'vuex';
 //Importing Youtube API Class
 import YouTube from '../../classes/Youtube.js';
 
+//Importing ConfigArr
+import { configArr } from '../../classes/configuration.js';
+
 Vue.use(Vuex);
 
 const state = {
@@ -109,7 +112,7 @@ const actions = {
 
     //Sets locations received from youtube at the time of initialize
     'SET_LOCATIONS':(context) => {
-        Vue.http.get('i18nRegions').then(response => response.json()).then(resp => {
+        Vue.http.get(configArr.Global.url + '/i18nRegions', {params: {'key': configArr.Global.parameters.key}}).then(response => response.json()).then(resp => {
 
             var responseArr = []; 
 
