@@ -51,8 +51,10 @@ export default class Youtube {
 
         //Get Last response token to get next one
         var lastAPIResp = store.getters.GET_LAST_API_RESPONSE;
-        if(lastAPIResp){
+        if(lastAPIResp && lastAPIResp.callFrom == this.section){
             if(lastAPIResp.response.nextPageToken) prmArr.params.pageToken = lastAPIResp.response.nextPageToken;
+        }else{
+            prmArr.params.pageToken = '';
         }
 
         //Setting Init. values
@@ -88,9 +90,9 @@ export default class Youtube {
      */
     getResponse(type = false, response = {}){
         if(type == true){
-            store.dispatch('SET_API_RESPONSE', {success: true, response: response});  
+            store.dispatch('SET_API_RESPONSE', {success: true, response: response, callFrom: this.section});  
         }else{
-            store.dispatch('SET_API_RESPONSE', {error: true, response: response});  
+            store.dispatch('SET_API_RESPONSE', {error: true, response: response, callFrom: this.section});  
         }
     }
 
