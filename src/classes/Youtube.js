@@ -13,8 +13,9 @@ export default class Youtube {
      * @param {String} callFrom - Currently called route
      */
     constructor(callFrom = 'Trending'){
-        this.section = callFrom
-        this.sectionObj = {}
+        this.section = callFrom;
+        this.sectionObj = {};
+        this.extraPrms = {};
         this.respObj = {
             nextPageToken: null,
             prevPageToken: null,
@@ -23,7 +24,8 @@ export default class Youtube {
                 current: 0
             }
         }
-        this.receivedResp = null
+        this.receivedResp = null;
+        this.successCallBack = null;
 
         //Setup init. data values
         this.initLoad();
@@ -34,9 +36,18 @@ export default class Youtube {
         //Load Main config file
         var sectionData = '';
 
+        if(typeof(this.section) == 'object'){
+            var ObjKeys = Object.keys(this.section);
+            if(ObjKeys.length > 0){
+                if(this.section['params'] && Object.keys(this.section['params']).length > 0) this.extraPrms = this.section['params'];
+                if(this.section['successCall']) this.successCallBack = this.section['successCall'];
+                if(this.section['endpoint']) this.section = this.section['endpoint'];
+            }
+        }
+
         if(configArr[this.section]) sectionData = configArr[this.section];
         if(!sectionData) this.getResponse(false, {error: 'Unable to load configuration for selected page'});
-
+        console.log(this);
         this.sectionObj = sectionData;
     }
 
@@ -55,6 +66,17 @@ export default class Youtube {
             if(lastAPIResp.response.nextPageToken) prmArr.params.pageToken = lastAPIResp.response.nextPageToken;
         }else{
             prmArr.params.pageToken = '';
+        }
+
+        //If extra paramerts are provided merge them with default parameters
+        if(Object.keys(this.extraPrms).length > 0){
+            var ObjKeys = Object.keys(this.extraPrms);
+            if(ObjKeys.length > 0){
+                for(const Key of ObjKeys){
+                    if(prmArr.params[Key]) prmArr.params[Key] = this.extraPrms[Key];
+                    else prmArr.params[Key] = this.extraPrms[Key];
+                }
+            }
         }
 
         //Setting Init. values
@@ -90,6 +112,12 @@ export default class Youtube {
      */
     getResponse(type = false, response = {}){
         if(type == true){
+            //If a success call back is defined then execute that
+            if(this.successCallBack){
+                this.successCallBack(response);
+                return false;
+            }
+
             store.dispatch('SET_API_RESPONSE', {success: true, response: response, callFrom: this.section});  
         }else{
             store.dispatch('SET_API_RESPONSE', {error: true, response: response, callFrom: this.section});  
