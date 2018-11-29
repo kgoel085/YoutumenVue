@@ -16,7 +16,7 @@ export const configArr = {
     },
     'Home':{
         parameters:{
-            params: {'chart': 'mostpopular', 'maxResults': 10, 'fields': 'nextPageToken,pageInfo,items(snippet/channelId)'},
+            params: {'chart': 'mostpopular', 'maxResults': 1, 'fields': 'nextPageToken,pageInfo,items(snippet/channelId)'},
             endpoint:'videos',
         }
     },
@@ -28,14 +28,20 @@ export const configArr = {
     },
     'Channel':{
         parameters:{
-            params: {'part': 'snippet,contentDetails', 'fields': 'items(id,contentDetails,snippet(title, thumbnails, description))'},
+            params: {'part': 'snippet,contentDetails', 'fields': 'items(id,contentDetails,snippet(title, thumbnails, description))', 'id': null},
             endpoint: 'channels'
         }
     },
     'Playlist':{
         parameters:{
-            params:{'part': 'snippet,contentDetails', 'maxResults': 10},
+            params:{'part': 'snippet,contentDetails', 'maxResults': 10, 'fields': 'items(snippet(resourceId/videoId))', 'playlistId': null},
             endpoint: 'playlistItems'
         }
+    },
+    'Video':{
+        parameters:{
+            params:{'part': 'snippet,contentDetails', 'id': null},
+            endpoint:'videos'
+        },
     }
 }
