@@ -1,22 +1,29 @@
 <template>
     <!-- Default layout -->
-    <div v-if="layout == 'default'">
-        <div class="col-md-12 videoBox">
-            <div class="media">
-                <div class="media-left">
-                    <a href="#">
-                    <img class="media-object" :src="currentObj.thumbnails.medium.url">
-                    </a>
+    <div>
+        <template  v-if="layout == 'default'">
+            <div class="col-md-12 videoBox">
+                    <div class="media">
+                        <div class="media-left">
+                            <a href="#">
+                            <img class="media-object" :src="currentObj.thumbnails.medium.url">
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <h4 class="media-heading">{{ currentObj.title }}</h4>
+                            <span class="media-content">
+                                <p><small>{{ currentObj.channelTitle }}</small> | <small>{{ currentObj.publishedAt | dateTime}}</small></p>
+                                {{ currentObj.description.substr(0, 400) + '....' }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="media-body">
-                    <h4 class="media-heading">{{ currentObj.title }}</h4>
-                    <span class="media-content">
-                        <p><small>{{ currentObj.channelTitle }}</small> | <small>{{ currentObj.publishedAt | dateTime}}</small></p>
-                        {{ currentObj.description.substr(0, 400) + '....' }}
-                    </span>
-                </div>
-            </div>
-        </div>
+        </template>
+
+        <template v-if="layout == 'playlistItem'">
+            {{ currentObj }}
+        </template>
+        
     </div>
 </template>
 
