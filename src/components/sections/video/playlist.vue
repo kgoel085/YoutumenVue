@@ -5,24 +5,27 @@
 </template>
 
 <script>
+import Youtube from '../../../classes/Youtube.js';
+
 export default {
     data(){
         return{
-            currentObj: {}
+            currentObj: {},
+            apiParamerts: {
+                'endpoint': 'Playlist', 
+                'params': {'playlistId': this.videoObject.playlistId},
+                'successCall': this.getResult
+            }
         }
     },
     methods:{
-        callAPi(){
-            var vm = this;
-            
-            var paramsArr = {'part': 'snippet,contentDetails', 'playlistId': vm.videoObject.playlistId, 'maxResults': 10};
-            this.$http.get('playlistItems', {params: paramsArr}).then(resp => resp.json()).then(response => {
-                console.log(response);
-            });
+        getResult(respObj){
+            console.log(respObj);
         }
     },
     created(){
-        this.callAPi();
+        var ytObj = new Youtube(this.apiParamerts);
+        ytObj.callAPi();
     },
     props:{
         videoObject:{

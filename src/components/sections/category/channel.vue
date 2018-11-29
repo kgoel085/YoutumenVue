@@ -22,40 +22,46 @@
 
 <script>
 import Video from '../video/index.vue';
+import Youtube from '../../../classes/Youtube.js';
+
 export default {
     data(){
         return{
             dataObj: {
                 category: {},
                 video: {}
+            },
+            apiParamerts: {
+                'endpoint': 'Channel', 
+                'params': {'id': this.catObject.channelId},
+                'successCall': this.getResult
             }
         }
     },
     methods:{
-        callAPi(){
+        getResult(respObj){
             var vm = this;
-            
-            var paramsArr = {'part': 'snippet,contentDetails', 'id': vm.catObject.channelId, 'fields': 'items(id,contentDetails,snippet(title, thumbnails, description))'};
-            this.$http.get('channels', {params: paramsArr}).then(resp => resp.json()).then(response => {
-                if(response.items){
-                    var respItm = response.items;
-                    respItm.forEach(element => {
-                        if(element.snippet){
-                            var snip = element.snippet;
-                            vm.dataObj.category = snip;
-                        }
+            var response = respObj;
 
-                        if(element.contentDetails.relatedPlaylists){
-                            var playList = element.contentDetails.relatedPlaylists;
-                            if(playList.uploads) vm.dataObj.video['playlistId'] = playList.uploads;
-                        }
-                    });
-                }
-            });
+            if(response.items){
+                var respItm = response.items;
+                respItm.forEach(element => {
+                    if(element.snippet){
+                        var snip = element.snippet;
+                        vm.dataObj.category = snip;
+                    }
+
+                    if(element.contentDetails.relatedPlaylists){
+                        var playList = element.contentDetails.relatedPlaylists;
+                        if(playList.uploads) vm.dataObj.video['playlistId'] = playList.uploads;
+                    }
+                });
+            }
         }
     },
     created(){
-        this.callAPi();
+        var ytObj = new Youtube(this.apiParamerts);
+        ytObj.callAPi();
     },
     props:{
         catObject:{
