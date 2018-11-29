@@ -3,18 +3,22 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="media">
-                    <div class="media-left">
-                        <a href="#">
-                            <img class="media-object" :src="dataObj.category.thumbnails.default.url">
-                        </a>
-                    </div>
-                    <div class="media-body">
-                        <h4 class="title"><strong>{{ dataObj.category.title.replace(/\b\w/g, function(l){ return l.toUpperCase() }) }}</strong></h4>
-                    </div>
+                    <template v-if="Object.keys(dataObj.category).length > 0">
+                        <div class="media-left">
+                            <a href="#">
+                                <img class="media-object" :src="dataObj.category.thumbnails.default.url">
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <h4 class="title"><strong>{{ dataObj.category.title.replace(/\b\w/g, function(l){ return l.toUpperCase() }) }}</strong></h4>
+                        </div>
+                    </template>
                 </div>
             </div>
             <div class="panel-body">
-                <cat-video :videoObj="dataObj.video" :videoType="this.view"></cat-video>
+                <template v-if="Object.keys(dataObj.video).length > 0">
+                    <cat-video :videoObj="dataObj.video" :videoType="this.view"></cat-video>
+                </template>
             </div>
         </div>
     </div>
