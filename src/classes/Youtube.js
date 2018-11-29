@@ -47,7 +47,6 @@ export default class Youtube {
 
         if(configArr[this.section]) sectionData = configArr[this.section];
         if(!sectionData) this.getResponse(false, {error: 'Unable to load configuration for selected page'});
-        console.log(this);
         this.sectionObj = sectionData;
     }
 
