@@ -8,10 +8,34 @@ export const configArr = {
         'url': 'URL of your API'
     },
     //Below keys define the parameters that will be send for the selected selection
+    'Locations':{
+        parameters:{
+            params: {},
+            endpoint: 'i18nRegions'
+        }
+    },
+    'Home':{
+        parameters:{
+            params: {'chart': 'mostpopular', 'maxResults': 10, 'fields': 'nextPageToken,pageInfo,items(snippet/channelId)'},
+            endpoint:'videos',
+        }
+    },
     'Trending':{
         parameters:{
             params: {'chart': 'mostpopular', 'maxResults': 10},
             endpoint:'videos',
+        }
+    },
+    'Channel':{
+        parameters:{
+            params: {'part': 'snippet,contentDetails', 'fields': 'items(id,contentDetails,snippet(title, thumbnails, description))'},
+            endpoint: 'channels'
+        }
+    },
+    'Playlist':{
+        parameters:{
+            params:{'part': 'snippet,contentDetails', 'maxResults': 10},
+            endpoint: 'playlistItems'
         }
     }
 }
