@@ -19,11 +19,6 @@
                     </div>
                 </div>
         </template>
-
-        <template v-if="layout == 'playlistItem'">
-            {{ currentObj }}
-        </template>
-        
     </div>
 </template>
 
