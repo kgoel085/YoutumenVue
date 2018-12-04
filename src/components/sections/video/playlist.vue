@@ -1,14 +1,14 @@
 <template>
     <div class="row">
         <template v-if="Object.keys(currentObj).length > 0">
-            <video-play v-for="(video, index) in currentObj" :key="index" :videoObj="video" :videoType="video.type"></video-play>
+            <video-play :videoObj="currentObj"></video-play>
         </template>
     </div>
 </template>
 
 <script>
 import Youtube from '../../../classes/Youtube.js';
-import VideoPlay from '../video/index.vue';
+import VideoCarousel from '../video/carousel.vue';
 
 export default {
     data(){
@@ -22,7 +22,7 @@ export default {
         }
     },
     components:{
-        'video-play': VideoPlay
+        'video-play': VideoCarousel
     },
     methods:{
         getResult(respObj, showVid = false){
