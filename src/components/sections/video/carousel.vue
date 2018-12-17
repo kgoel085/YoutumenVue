@@ -7,7 +7,7 @@
             </div>
         </transition-group>
         <div class='carousel-controls'>
-            <button class='btn carousel-prev'><i class="glyphicon glyphicon-chevron-left"></i></button>
+            <button class='btn carousel-prev' v-if="goLeft"><i class="glyphicon glyphicon-chevron-left"></i></button>
             <button class='btn carousel-next'><i class="glyphicon glyphicon-chevron-right"></i></button>
         </div>
        
@@ -18,7 +18,8 @@
 export default {
     data(){
         return{
-            slides: this.videoObj
+            slides: this.videoObj,
+            goLeft: false
         }
     },
     methods: {
