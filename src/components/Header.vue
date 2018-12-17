@@ -15,7 +15,7 @@
                     <img src="../assets/logo.png" style="width:100px;height:auto">
                 </router-link>
             </div>
-            
+
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" :class="{in: toggledMenu}" id="bs-example-navbar-collapse-1">
@@ -45,11 +45,12 @@ export default {
     data(){
         return{
             toggledMenu: false,
-            searchVal: this.$route.query.searchQry
+            searchField: null
         }
     },
     methods:{
         searchValue(){
+            console.log(this.searchVal);
             if(!this.searchVal) return false;
             var searchQuery = this.searchVal;
 
@@ -64,6 +65,16 @@ export default {
             set(value){
                 this.$store.dispatch('SET_SIDEBAR_VIEW', value);
                 this.toggledMenu = value;
+            }
+        },
+        searchVal:{
+            get(){
+                var returnVal = this.searchField;
+                if(!returnVal) returnVal = this.$route.query.searchQry;
+                return returnVal;
+            },
+            set(value){
+               this.searchField = value; 
             }
         }
     },
