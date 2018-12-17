@@ -24,8 +24,8 @@
                 </ul>
                 <form class="navbar-form navbar-left">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for...">
-                        <span class="input-group-btn">
+                        <input type="text" class="form-control" placeholder="Search for..." v-model="searchVal">
+                        <span class="input-group-btn" @click="searchValue()">
                             <button class="btn btn-default" type="button">
                                 <i class="glyphicon glyphicon-search"></i>
                             </button>
@@ -44,7 +44,16 @@
 export default {
     data(){
         return{
-            toggledMenu: false
+            toggledMenu: false,
+            searchVal: this.$route.query.searchQry
+        }
+    },
+    methods:{
+        searchValue(){
+            if(!this.searchVal) return false;
+            var searchQuery = this.searchVal;
+
+            this.$router.push({ name: 'Search', query: { searchQry: searchQuery }})
         }
     },
     computed:{
@@ -56,7 +65,6 @@ export default {
                 this.$store.dispatch('SET_SIDEBAR_VIEW', value);
                 this.toggledMenu = value;
             }
-           
         }
     },
     watch:{

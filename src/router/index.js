@@ -14,6 +14,12 @@ const Trending = resolve => {
   }, 'Trending');
 }
 
+const Search = resolve => {
+  require.ensure(['../components/Search.vue'], () => {
+      resolve(require('../components/Search.vue'));
+  }, 'Search');
+}
+
 Vue.use(Router)
 
 export default new Router({
@@ -28,6 +34,11 @@ export default new Router({
       path: '/trending',
       name: 'Trending',
       component: Trending,
+    },
+    {
+      path:'/search',
+      name: 'Search',
+      component: Search
     }
   ]
 })
