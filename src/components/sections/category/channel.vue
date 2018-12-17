@@ -1,5 +1,5 @@
 <template>
-    <div class="col-md-12">
+    <div class="col-md-12" v-if="showBlock">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="media">
@@ -11,6 +11,9 @@
                         </div>
                         <div class="media-body">
                             <h4 class="title"><strong>{{ dataObj.category.title.replace(/\b\w/g, function(l){ return l.toUpperCase() }) }}</strong></h4>
+                        </div>
+                        <div class="media-right">
+                            <i class="glyphicon glyphicon-remove" @click="showBlock = !showBlock"></i>
                         </div>
                     </template>
                 </div>
@@ -39,7 +42,8 @@ export default {
                 'endpoint': 'Channel', 
                 'params': {'id': this.catObject.channelId},
                 'successCall': this.getResult
-            }
+            },
+            showBlock: true
         }
     },
     methods:{
@@ -106,5 +110,11 @@ export default {
 
     .media-body .title{
         font-weight: 500
+    }
+
+    .glyphicon{
+        color:#ccc;
+        cursor:pointer;
+        font-size:2em;
     }
 </style>
