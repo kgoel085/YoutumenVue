@@ -2,7 +2,7 @@
     <!-- Default layout -->
     <div>
         <template  v-if="layout == 'default'">
-            <div class="col-md-12 videoBox">
+            <div class="col-md-12 videoBox" @click="showVideo(currentObj.videoId)">
                     <div class="media">
                         <div class="media-left">
                             <a href="#">
@@ -27,6 +27,11 @@ export default {
     data(){
         return{
             currentObj: this.videoObject
+        }
+    },
+    methods:{
+        showVideo(id){
+            this.$store.dispatch('SHOW_VIDEO', id);
         }
     },
     props:{

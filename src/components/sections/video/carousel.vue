@@ -1,7 +1,7 @@
 <template>
     <div class='carousel-view'>
         <transition-group class="carousel" tag="div">
-            <div class="thumbnail" :style="{width: slide.thumbnails.medium.width+'px', height: slide.thumbnails.medium.height+'px'}" v-for="(slide, index) in slides" :key="index">
+            <div class="thumbnail" :style="{width: slide.thumbnails.medium.width+'px', height: slide.thumbnails.medium.height+'px'}" v-for="(slide, index) in slides" :key="index" @click="showVideo(slide.videoId)">
                 <img :src="slide.thumbnails.medium.url" :alt="slide.title" style="width:100%;height:auto">
                 <span class="caption"><strong class="title">{{ slide.title.substring(0,70) }}</strong></span>
             </div>
@@ -30,6 +30,9 @@ export default {
         previous () {
             const last = this.slides.pop()
             this.slides = [last].concat(this.slides)
+        },
+        showVideo(id){
+            this.$store.dispatch('SHOW_VIDEO', id);
         }
     },
     props:{
@@ -96,36 +99,4 @@ export default {
     .carousel-next{
         right:-1%
     }
-
-    /* .carousel-view {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .carousel {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        
-        width: 24em;
-        min-height: 25em;
-    }
-    .slide {
-        flex: 0 0 20em;
-        height: 20em;
-        margin: 1em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 0.1em dashed #000;
-        border-radius: 50%;
-        transition: transform 0.3s ease-in-out;
-    }
-    .slide:first-of-type {
-        opacity: 0;
-    }
-    .slide:last-of-type {
-        opacity: 0;
-    } */
 </style>
