@@ -50,7 +50,6 @@ export default {
     },
     methods:{
         searchValue(){
-            console.log(this.searchVal);
             if(!this.searchVal) return false;
             var searchQuery = this.searchVal;
 
