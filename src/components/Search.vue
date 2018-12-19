@@ -97,6 +97,10 @@ export default {
                         var snip = element.snippet;
 
                         element.snippet.type = 'preview';
+                        if(element.id){
+                            if(element.id.videoId) element.snippet.videoId = element.id.videoId;
+                            else if(element.id.playlistId) element.snippet.videoId = element.id.playlistId;
+                        }
                         vm.videoObj.push(element.snippet);
                     }
                 });

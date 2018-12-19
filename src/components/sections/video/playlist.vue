@@ -41,6 +41,7 @@ export default {
                             if(snip.resourceId.videoId) tmpArr.push(snip.resourceId.videoId);
                         }else{
                             snip['type'] = 'playlistItem';
+                            if(element.id) snip['videoId'] = element.id;
                             vm.currentObj.push(snip);
                         }
                         
