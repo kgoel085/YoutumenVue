@@ -20,6 +20,12 @@ const Search = resolve => {
   }, 'Search');
 }
 
+const Player = resolve => {
+  require.ensure(['../components/sections/video/player.vue'], () => {
+      resolve(require('../components/sections/video/player.vue'));
+  }, 'Player');
+}
+
 Vue.use(Router)
 
 export default new Router({
@@ -39,6 +45,11 @@ export default new Router({
       path:'/search',
       name: 'Search',
       component: Search
+    },
+    {
+      path:'/video/:id',
+      name: 'Player',
+      component: Player
     }
   ]
 })
