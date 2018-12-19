@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import router from '../../router/index';
 
 //Importing Youtube API Class
 import YouTube from '../../classes/Youtube.js';
@@ -162,6 +163,11 @@ const actions = {
 
         //Finish Loader
         NProgress.done();
+    },
+
+    //re-direct to video page with the received video ID
+    'SHOW_VIDEO':(context, resp) => {
+        router.push({ 'name': 'Player', 'params':{'id': resp}})
     }
 };
 
