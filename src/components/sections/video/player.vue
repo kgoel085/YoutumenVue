@@ -1,6 +1,48 @@
 <template>
     <div class="row">
+        <!-- User can also provide a specific video / playlist -->
+        <template v-if="!videoFound">
+            <!-- Modal -->
+            <div id="myModal" class="modal fade in" role="dialog" style="display:block">
+                <div class="modal-dialog">
 
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger">
+                            <h4 class="modal-title">Provide either a video url / ID </h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p>A youtube URL looks like this ( string afer <strong>/watch?v=*</strong> is the video id you want to play ) </p>
+                                    <strong>https://www.youtube.com/watch?v=<span class="bg-danger">XXXXXXXXXX</span></strong>
+                                </div>
+                                <div class="col-md-12">
+                                    <br>
+                                    <div class="form-group">
+                                        <label for="">Paste video URL / ID</label>
+                                        <input type="text" name="" id="" class="form-control" placeholder='Paste URl / ID' v-model="videoInput" @change="checkUrl()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template v-else>
+            <div class="col-md-12">
+                Video Type is : {{ videoType }} <br>
+                <template v-if="playlistVideo">
+                    Playlist ID is : {{ videoId }} <br>
+                    Playlist video ID is : {{ playlistVideo }} <br>
+                </template>
+                <template v-else>
+                    Video ID is : {{ videoId }} <br>
+                </template>
+            </div>
+        </template>
     </div>
 </template>
 
@@ -11,8 +53,13 @@ export default {
     data(){
         return{
             iframeUrl: 'https://www.youtube.com/embed',
+
             videoId: null,
             videoType: null,
+            
+            playlistVideo: null,
+            
+            videoInput: null,
             config: {
                 url: configArr.Global.url,
                 key: configArr.Global.parameters.key
@@ -22,7 +69,11 @@ export default {
     computed:{
         //Check for whether video / playlist found or not
         videoFound(){
-            if(this.videoId && this.videoType) return true;
+            if(this.videoId && this.videoType){
+                if(this.videoInput) this.videoInput = null
+                return true;
+            }    
+            if(this.playlistVideo) this.playlistVideo = null
             return false;
         }
     },
@@ -76,6 +127,46 @@ export default {
                     this.getResponse();
                 });
             }
+        },
+
+        //Check whether provided youtube URL is valid or not
+        checkUrl(){
+            var urlType = null;
+            var urlID = null;
+
+            var videoRegEx = /(?:youtube\.com.*(?:\?|&)(?:v)=|youtube\.com.*embed\/|youtube\.com.*v\/|youtu\.be\/)((?!videoseries)[a-zA-Z0-9_]*)/g;
+            var playlist = /(?:(?:\?|&)list=)((?!videoseries)[a-zA-Z0-9_]*)/g;
+
+            var matchString = this.videoInput;
+
+            //Check if it is playlist or not
+            if(matchString.match(playlist)){
+                urlType = 'playlist';
+                var extractedID = RegExp.$1;
+                if(extractedID){
+                    urlID = extractedID;
+                }
+            }
+
+            //if(!urlID || !urlType){
+                //Check if it is video or not
+                if(matchString.match(videoRegEx)){
+                    var extractedID = RegExp.$1;
+                    if(extractedID){
+
+                        //If playlist is already set, this will be the video id to play in the playlist
+                        if(urlType == 'playlist'){
+                            this.playlistVideo = extractedID;
+                        }else{
+                            urlType = 'video';
+                            urlID = extractedID;
+                        }
+                    }
+                }
+            //}
+
+            if(urlType) this.videoType = urlType;
+            if(urlID) this.videoId = urlID;
         }
     },
     mounted(){
@@ -84,6 +175,6 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+    .bg-danger{background-color: #ff0000;color:#fff}
 </style>
