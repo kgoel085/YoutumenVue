@@ -34,7 +34,7 @@ export const configArr = {
     },
     'Playlist':{
         parameters:{
-            params:{'part': 'snippet,contentDetails', 'maxResults': 10, 'fields': 'items(snippet(resourceId/videoId))', 'playlistId': null},
+            params:{'part': 'snippet,contentDetails', 'maxResults': 8, 'fields': 'items(snippet(resourceId/videoId))', 'playlistId': null},
             endpoint: 'playlistItems'
         }
     },
