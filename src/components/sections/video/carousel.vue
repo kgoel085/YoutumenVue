@@ -1,11 +1,11 @@
 <template>
     <div class='carousel-view'>
-        <transition-group class="carousel" tag="div">
+        <div class="carousel">
             <div class="thumbnail" :style="{width: slide.thumbnails.medium.width+'px', height: slide.thumbnails.medium.height+'px'}" v-for="(slide, index) in slides" :key="index" @click="showVideo(slide.videoId)">
                 <img :src="slide.thumbnails.medium.url" :alt="slide.title" style="width:100%;height:auto">
                 <span class="caption"><strong class="title">{{ slide.title.substring(0,70) }}</strong></span>
             </div>
-        </transition-group>
+        </div>
         <div class='carousel-controls'>
             <button class='btn carousel-prev' v-if="goLeft"><i class="glyphicon glyphicon-chevron-left"></i></button>
             <button class='btn carousel-next'><i class="glyphicon glyphicon-chevron-right"></i></button>
