@@ -47,7 +47,7 @@ export default new Router({
       component: Search
     },
     {
-      path:'/video/:id',
+      path:'/watch/:id?',
       name: 'Player',
       component: Player
     }
