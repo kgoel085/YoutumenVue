@@ -39,7 +39,11 @@ export default {
   },
   watch:{
     changedVal(value){
+      //If Sidebar is changed trigger the sidebar component
       if(this.sideBar) this.$store.dispatch('SET_SIDEBAR_VIEW', !this.sideBar);
+      
+      //If route has a name, then trigger the call api again with changed values
+      if(this.$route.name) this.$store.dispatch('CALL_API', this.$route.name);
     }
   },
   components:{
