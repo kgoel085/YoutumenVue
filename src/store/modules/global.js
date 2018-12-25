@@ -167,7 +167,7 @@ const actions = {
 
     //re-direct to video page with the received video ID
     'SHOW_VIDEO':(context, resp) => {
-        router.push({ 'name': 'Player', 'params':{'id': resp}})
+        router.push({ 'name': 'Player', 'params':{'video': resp}})
     }
 };
 
