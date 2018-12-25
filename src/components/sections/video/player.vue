@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div class="playerBLock">
         <!-- User can also provide a specific video / playlist -->
         <template v-if="!videoFound">
             <div class="form-group">
@@ -27,21 +27,27 @@
         </template>
 
         <template v-else>
-            {{ ifrmUrl }}
-            <div class="embed-responsive embed-responsive-4by3">
-  <iframe class="embed-responsive-item" :src="ifrmUrl"></iframe>
-</div>
+            <div class="row">
+                <!-- iFrame Block -->
+                <div class="col-md-8">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" :src="ifrmUrl" style="width:100%;height:500px!important"></iframe>
+                    </div>
+                </div>
+                
 
-            <div class="col-md-12">
-                Video Type is : {{ videoType }} <br>
-                <template v-if="playlistVideo">
-                    Playlist ID is : {{ videoId }} <br>
-                    Playlist video ID is : {{ playlistVideo }} <br>
-                </template>
-                <template v-else>
-                    Video ID is : {{ videoId }} <br>
-                </template>
+                <!-- <div class="col-md-12">
+                    Video Type is : {{ videoType }} <br>
+                    <template v-if="playlistVideo">
+                        Playlist ID is : {{ videoId }} <br>
+                        Playlist video ID is : {{ playlistVideo }} <br>
+                    </template>
+                    <template v-else>
+                        Video ID is : {{ videoId }} <br>
+                    </template>
+                </div> -->
             </div>
+            
         </template>
     </div>
 </template>
@@ -62,6 +68,8 @@ export default {
             vidUrlInput: null,
 
             invalidUrl: false,
+
+            frame:{},
 
             config: {
                 url: configArr.Global.url,
@@ -173,7 +181,7 @@ export default {
             this.invalidUrl = true;
         }
     },
-    beforeMount(){
+    mounted(){
         //this.checkForId();
     }
 }
