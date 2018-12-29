@@ -1,5 +1,7 @@
 <template>
-    <div class="playerBLock">
+    <div class="playerBlock">
+        <div id="overlay" v-if="!YTObj"></div>
+
         <!-- User can also provide a specific video / playlist -->
         <template v-if="!videoFound">
             <div class="form-group">
@@ -16,8 +18,8 @@
                                 <br>
                                 <div class="form-group">
                                     <label for="">Paste video URL</label>
-                                    <input type="text" name="" id="" class="form-control" placeholder='Paste URl / ID' v-model="vidUrlInput" @change="checkUrl()">
-                                    <span v-if="invalidUrl" class="text-danger">Invalid URL</span>
+                                    <input type="text" name="" id="" class="form-control" placeholder='Paste Youtube Vidoe / playlist URl ' v-model="userUrl.input" @change="checkUrl()">
+                                    <span v-if="userUrl.error" class="text-danger">{{ userUrl.errorMsg }}</span>
                                 </div>
                             </div>
                         </div>
@@ -25,52 +27,77 @@
                 </div>
             </div>
         </template>
-
         <template v-else>
+            <!-- Youtube Player container -->
             <div class="row">
-                <!-- iFrame Block -->
+                <!-- Video Player -->
                 <div class="col-md-8">
-                    <div class="embed-responsive embed-responsive-16by9">
-                        <iframe class="embed-responsive-item" :src="ifrmUrl" style="width:100%;height:500px!important"></iframe>
+                    <div class="row">
+                        <!-- Video Frame -->
+                        <div class="col-md-12">
+                            <div class="embed-responsive embed-responsive-16by9">        
+                                <div id="videoPlyr" class="embed-responsive-item"></div>
+                            </div>
+                        </div>
+
+                        <!-- Video Description -->
+                        <div class="col-md-12">
+                            
+                        </div>
                     </div>
                 </div>
-                
 
-                <!-- <div class="col-md-12">
-                    Video Type is : {{ videoType }} <br>
-                    <template v-if="playlistVideo">
-                        Playlist ID is : {{ videoId }} <br>
-                        Playlist video ID is : {{ playlistVideo }} <br>
-                    </template>
-                    <template v-else>
-                        Video ID is : {{ videoId }} <br>
-                    </template>
-                </div> -->
+                <!-- Playlist Block -->
+                <div class="col-md-4">
+                    <ul class="list-group">
+                        <li v-for="(vid, index) in videos" :key="index" class="list-group-item" @click="playVid(vid.vidId)">
+                            <div class="media">
+                                <div class="media-left">
+                                    <a href="#">
+                                        <img class="media-object" :src="vid.thumbnails.medium.url" width="140px" height="auto">
+                                    </a>
+                                </div>
+                                <div class="media-body">
+                                    <span class="media-heading"><strong>{{ vid.title }}</strong></span><br>
+                                    <small>{{ vid.channelTitle }}</small>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            
         </template>
     </div>
 </template>
 
 <script>
 import { configArr } from '../../../classes/configuration';
-
+var player = '';
 export default {
     data(){
         return{
-            iframeUrl: 'https://www.youtube.com/embed',
+            //Player Obj vars
+            YTObj: null,
+            YtObjChk: null,
 
+            //Player parameters
+            videos:[],
+            playlistVids:[],
             videoId: null,
-            videoType: null,
-            
-            playlistVideo: null,
-            
-            vidUrlInput: null,
+            playlistId: null,
+            currentId: this.videoId,
+            playerConfig:{
+                autoplay: true
+            },
 
-            invalidUrl: false,
+            //User provided url input
+            userUrl:{
+                input: null,
+                error: false,
+                errorMsg: (this.$route.query.urlErr) ? this.$route.query.urlErr : 'Invalid URL'
+            },
 
-            frame:{},
-
+            //Contains API call point required vars
             config: {
                 url: configArr.Global.url,
                 key: configArr.Global.parameters.key
@@ -80,113 +107,178 @@ export default {
     computed:{
         //Check for whether video / playlist found or not
         videoFound(){
-            if(this.$route.params.video){
-                this.videoId = this.$route.params.video;
-                this.videoType = 'video';
+            //If user provided video id using URL
+            if(!this.videoId){
+                if(this.$route.query.v) this.videoId = this.$route.query.v;
             }
 
-            if(this.$route.query.list){
-                this.videoId = this.$route.query.list;
-                this.playlistVideo = this.$route.params.video;
-                this.videoType= 'playlist';
+            //If user provided playlist id using URL
+            if(!this.playlistId){
+                if(this.$route.query.list) this.playlistId = this.$route.query.list;
             }
 
-            if(this.videoId && this.videoType){
-                if(this.vidUrlInput) this.vidUrlInput = null
+            if(this.videoId || this.playlistId){
+                this.createPlayer();
                 return true;
-            }    
-            if(this.playlistVideo) this.playlistVideo = null
+            }
+
             return false;
         },
+    },
+    watch:{
+        videoId(val){
+            if(!val) return ;
+            this.checkId('videos', {'id': val, 'part': 'snippet,contentDetails'});
+        },
+        
+        playlistId(val){
+            if(!val) return ;
+           this.checkId('playlistItems', {'playlistId': val, 'part': 'snippet,contentDetails','maxResults': 50});
+        },
+        
+        //If Yt obj isset, clear the check interval loop
+        YTObj(val){
+            if(val) clearTimeout(this.YtObjChk);
+        },
 
-        //Constructs the iframe url
-        ifrmUrl(){
-            var url = "https://www.youtube.com/embed/";
-            var urlParams = ['origin='+window.location.protocol+'//'+window.location.hostname];
-            var vidId = this.videoId;
+        //Add videos from playlist to main video playlist 
+        playlistVids(val){
+            val.forEach(element => {
+                //Find if current id is all ready in main video arr
+                var a = this.videos.indexOf(element);
+                if(a < 0) this.checkId('videos', {'id': element, 'part': 'snippet,contentDetails'});
+            });
+        },
 
-            if(this.videoType == 'playlist'){
-                vidId = this.playlistVideo;
-                urlParams.push('listType=playlist');
-                urlParams.push('list='+this.videoId);
-            }
-
-            if(vidId) url = url+vidId;
-            if(urlParams.length > 0){
-                var strTemp = urlParams.join('&');
-                url = url+'?'+strTemp;
-            }
-
-            return url;
+        currentId(val){
+            console.log(val);
         }
     },
     methods:{
-        //Check whether provided youtube URL is valid or not
-        checkUrl(){
-            var urlType = null;
-            var urlID = null;
+        checkYtAPI(){
+            //Check if Youtube YT obj is loaded or not   
+            if(window.YT) this.YTObj = window.YT; 
 
-            var videoRegEx = /(?:youtube\.com.*(?:\?|&)(?:v)=|youtube\.com.*embed\/|youtube\.com.*v\/|youtu\.be\/)((?!videoseries)[a-zA-Z0-9_]*)/g;
+            //If not loaded start a loop to check when it is loaded set the var
+            if(!this.YTObj){
+                this.YtObjChk = setTimeout(() => {
+                    if(window.YT) this.YTObj = window.YT;
+                }, 1000);
+            }
+        },
+
+        //Check the provided URL for Video / Playlist ID
+        checkUrl(){
+            // RegEx to check for either video or playlist id 
+            var video = /(?:youtube\.com.*(?:\?|&)(?:v)=|youtube\.com.*embed\/|youtube\.com.*v\/|youtu\.be\/)((?!videoseries)[a-zA-Z0-9_]*)/g;
             var playlist = /(?:(?:\?|&)list=)((?!videoseries)[a-zA-Z0-9_]*)/g;
 
-            var matchString = this.vidUrlInput;
+            var testString = this.userUrl.input;
 
-            //Check if it is playlist or not
-            if(matchString.match(playlist)){
-                urlType = 'playlist';
-                var extractedID = RegExp.$1;
-                if(extractedID){
-                    urlID = extractedID;
+            //Check for video
+            if(testString.match(video)) this.videoId = RegExp.$1;
+
+            //Check for playlist
+            if(testString.match(playlist)) this.playlistId = RegExp.$1;
+            
+            if(this.videoId || this.playlistId){
+                var queryUrl = {};
+                if(this.videoId) queryUrl.v = this.videoId;
+                if(this.playlistId) queryUrl.list = this.playlistId;
+
+                if(Object.keys(queryUrl).length > 0){
+                    this.$router.push({
+                        name:'Player',
+                        query: queryUrl
+                    });
                 }
-            }
+            }else this.userUrl.error = true;
+        },
 
-            //Check if it is video or not
-            if(matchString.match(videoRegEx)){
-                var extractedID = RegExp.$1;
-                if(extractedID){
+        //Checks whether provided vidoe / playlist id is valid or not
+        checkId(endPoint = null, params = {}, chkID){
+            if(!endPoint || Object.keys(params).length == 0) return endPoint;
+            if(!params.key) params.key = this.config.key;
 
-                    //If playlist is already set, this will be the video id to play in the playlist
-                    if(urlType == 'playlist'){
-                        this.playlistVideo = extractedID;
-                    }else{
-                        urlType = 'video';
-                        urlID = extractedID;
+            var vm = this;
+
+            this.$http.get(this.config.url+'/'+endPoint, {'params': params}).then(response => response.json()).then(resp => {
+               if(resp.items && resp.items.length > 0){
+                   resp.items.forEach(element => {
+                       if(element.snippet && params.id) element.snippet.vidId = params.id;
+                       if(endPoint == 'videos') this.videos.push(element.snippet);
+                       else{
+                           if(element.snippet){
+                               if(element.snippet.resourceId.videoId) this.playlistVids.push(element.snippet.resourceId.videoId);
+                           }
+                       }
+                   });
+                }else{
+
+                }
+            }, err => {
+                //console.log(err);
+            });
+        },
+
+        //Creates Youtubeplayer instance
+        createPlayer(){
+            if(this.YTObj.Player){
+                if(player) player = null;
+
+                //Youtube Player Object
+                player = new this.YTObj.Player('videoPlyr', {
+                    width: 600,
+                    height: 400,
+                    videoId: this.videoId,
+                    events: {
+                        onReady: this.initialize
                     }
-                }
-            }
-
-            //Create URL
-            var urlVidID = null;
-            var paraUrl = {};
-
-            if(urlID){
-                urlVidID = urlID;
-
-                if(this.playlistVideo){
-                    urlVidID = this.playlistVideo;
-
-                    paraUrl['listType'] = 'playlist';
-                    paraUrl['list'] = urlID;
-                }
-            }
-
-            if(urlVidID){
-                this.$router.push({
-                    'name': 'Player',
-                    'query': paraUrl,
-                    'params': {'video': urlVidID}
                 });
+            }else{
+                this.checkYtAPI();
             }
+        },
 
-            this.invalidUrl = true;
+        //Setup environment when player is ready
+        initialize(){
+            player.playVideo();
+        },
+
+        //Play provided vid ID
+        playVid(id){
+            this.currentId = id;
+            player.cueVideoById(id).playVideo();
         }
     },
-    mounted(){
+    beforeCreate(){
+        //Append API source in the header
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    },
+    beforeMount(){
+        this.checkYtAPI();
         //this.checkForId();
+    },
+    updated(){
+        this.checkYtAPI();
+        this.createPlayer();
     }
 }
 </script>
 
 <style scoped>
+    #overlay{
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color:#000;
+        opacity: .75;
+        z-index: 9999999;
+    }
     .bg-danger{background-color: #ff0000;color:#fff}
 </style>
