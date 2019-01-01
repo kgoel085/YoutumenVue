@@ -137,6 +137,7 @@ export default {
                 if(!vm.YtPlyr.obj){
                     vm.YtPlyr.checkVar = setTimeout(() => {
                         if(window.YT.Player){
+                            //Show user player is loaded and than proceed
                             vm.playerLoading = false;
                             setTimeout(() => {
                                 vm.YtPlyr.obj = window.YT.Player;
