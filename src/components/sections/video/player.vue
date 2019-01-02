@@ -42,8 +42,7 @@
             <!-- If Video / Playlist id found proceed further -->
             <template v-else>
                 <p v-if="PlayerLoaded">Youtube Player Loaded</p>
-                <p v-if="videoId">Fetched video id: {{ videoId }}</p>
-                <p v-if="playlistId">Fetched playlist id: {{ playlistId }}</p>
+                <video-plyer :playrObj="YtPlyr.obj" :videoId="videoId" :playlistId="playlistId"></video-plyer>
             </template>
         </template>
     </div>
@@ -51,6 +50,7 @@
 
 <script>
 import Loader from '../../sections/extras/loader';
+import videoPlayer from '../../sections/extras/videoPlayer';
 export default {
     data(){
         return{
@@ -203,7 +203,7 @@ export default {
     beforeCreate(){
         //Append API source in the header
         var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
+        tag.src = "https://www.youtube.com/iframe_api?origin=http://localhost:8080";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     },
@@ -217,7 +217,8 @@ export default {
         if(!this.YtPlyr.obj) this.chkApiObj();
     },
     components:{
-        'loader-div': Loader
+        'loader-div': Loader,
+        'video-plyer': videoPlayer
     }
 }
 </script>
