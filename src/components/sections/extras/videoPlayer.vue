@@ -6,14 +6,14 @@
             </div>
         </template>
         <template v-else>
-            <div class="col-md-8">
+            <div id="playerBlck" class="col-md-8">
                 <div id="videoPlyr"></div>
                 <p v-if="videoId !== null">Received Video id is {{ videoId }}</p>
                 <p v-if="playlistId !== null">Received Playlist id is {{ playlistId }}</p>
             </div>
             <div class="col-md-4">
-                <ul class="list-group">
-                    <li v-for="(vid, index) in videoDetailsArr" :key="index" class="list-group-item" @click="playVid(vid.vidId)">
+                <ul id="playlistBlck" class="list-group">
+                    <li v-for="(vid, index) in videoDetailsArr" :key="index" class="list-group-item" @click="playVid(vid.id, $event)" :data-id="vid.id">
                         <template v-if="vid.title">
                             <div class="media">
                                 <div class="media-left">
@@ -34,7 +34,6 @@
                 </ul>
             </div>
         </template>
-        
     </div>
 </template>
 
@@ -54,37 +53,42 @@ export default {
             },
 
             playerFrame: null,
-            playListArr: [],
-            currentPlayId: null,
-            videoDetailsArr:[],
-            
+            videoDetailsArr:[]
         }
     },
     computed:{
         ListReady(){
             return false;
         },
-        videoIdArr(){
-            var tmpArr = [];
-            if(this.videoId) tmpArr.push(this.videoId);
-            if(this.playListArr){
-                tmpArr = tmpArr.concat(this.playListArr);
-            }
-
-            return tmpArr;
-        },
         playlistGenerated(){
-            if(this.videoDetailsArr.length > 0){
-                this.createPlayer();
-                return true;
-            }
-
+            if(this.videoDetailsArr.length > 0) return true;
             return false;
         }
     },
     watch:{
-        videoIdArr(val){
-            this.getVidDetails(val);
+        playlistGenerated(val){
+            if(val){
+                //If playlist is generated, play the video
+                setTimeout(() => {
+                    var listItem = null;
+                    var listItemVid = null;
+
+                    //Playlist first video id
+                    var firstChidId = this.videoDetailsArr[0].id;
+                    if(firstChidId){
+                        if(document.querySelector('[data-id="'+firstChidId+'"]')) listItemVid = document.querySelector('[data-id="'+firstChidId+'"]');
+                    }
+
+                    //If video id is there play that video
+                    if(this.videoId){
+                        if(document.querySelector('[data-id="'+this.videoId+'"]')) listItemVid = document.querySelector('[data-id="'+this.videoId+'"]');
+                    }
+
+                    if(listItemVid !== null && listItemVid){
+                        listItemVid.click();
+                    }
+                }, 1000);
+            } 
         }
     },
     methods:{
@@ -94,10 +98,9 @@ export default {
              var paramsArr = {'playlistId': val, 'part': 'snippet,contentDetails','maxResults': 50, 'key': this.config.key, 'fields': 'items(snippet(resourceId/videoId))'};
             this.$http.get(this.config.url+'/playlistItems', {'params': paramsArr}).then(response => response.json()).then(resp => {
                 if(resp.items && resp.items.length > 0){
-                    var tmpIdArr = [];
                     resp.items.forEach(element => {
                        if(element.snippet){
-                            if(element.snippet.resourceId.videoId) vm.playListArr.push(element.snippet.resourceId.videoId);
+                            if(element.snippet.resourceId.videoId) this.getVidDetails(element.snippet.resourceId.videoId);
                         }
                    });
                 }
@@ -107,34 +110,39 @@ export default {
         //Get all video details
         getVidDetails(val = this.videoIdArr){
             var vm = this;
-            if(this.videoIdArr.length > 0){
-                var videoIds = this.videoIdArr.join(',');
-                var paramsArr = {'id': videoIds, 'part': 'snippet,contentDetails','key': this.config.key};
-                this.$http.get(this.config.url+'/videos', {'params': paramsArr}).then(response => response.json()).then(resp => {
-                    if(resp.items && resp.items.length > 0){
-                            var tmpIdArr = [];
-                            resp.items.forEach(element => {
-                            if(element.snippet){
-                                element.snippet.id = element.id;
-                                vm.videoDetailsArr.push(element.snippet);
-                            }
-                        });
-                    }
-                });
-            }
+            var paramsArr = {'id': val, 'part': 'snippet,contentDetails','key': this.config.key};
+            this.$http.get(this.config.url+'/videos', {'params': paramsArr}).then(response => response.json()).then(resp => {
+                if(resp.items && resp.items.length > 0){
+                    resp.items.forEach(element => {
+                        if(element.snippet){
+                            element.snippet.id = element.id;
+                            vm.videoDetailsArr.push(element.snippet);
+                        }
+                    });
+                }
+            });
+        },
+
+        //Play the current clicked video
+        playVid(vidID, event){
+            var listItem = event.target.closest('li');
+            this.createPlayer(vidID);
         },
 
         //Get Playlist video id's
-        createPlayer(vidId = this.videoId){
+        createPlayer(vidId){
+            if(!vidId) vidId = this.videoId;
+
             if(this.playrObj){
-                if(this.playerFrame !== null) this.playerFrame = null;
+                if(this.playerFrame !== null) this.playerFrame.destroy();
 
                 var configObj = {
                     width: '100%',
                     height: 500,
                     videoId: vidId,
                     events: {
-                        onReady: this.initialize
+                        onReady: this.initialize,
+                        onStateChange: this.checkState
                     }
                 };
 
@@ -145,13 +153,16 @@ export default {
 
         //This will be executed when player is ready
         initialize(){
-            //this.playerFrame.playVideo();
+            this.playerFrame.playVideo();
+        },
+
+        checkState(evt){
+            //console.log(evt);
         }
     },
     beforeMount(){
-         if(this.playlistId){
-           this.getPlaylistVideos(this.playlistId);
-        }
+        if(this.videoId) this.getVidDetails(this.videoId);
+        if(this.playlistId) this.getPlaylistVideos(this.playlistId);
     },
     props:{
         videoId:{
