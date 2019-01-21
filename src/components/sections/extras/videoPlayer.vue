@@ -25,10 +25,10 @@
                                         <span class="btn" @click="autoplay = !autoplay" >Autoplay</span> 
                                     </span>
                                     <template v-if="autoplay">
-                                        <span class="glyphicon glyphicon-ok" style="padding:7px"></span>
+                                        <span class="glyphicon glyphicon-ok text-success" style="padding:7px"></span>
                                     </template>
                                     <template v-else>
-                                        <span class="glyphicon glyphicon-remove" style="padding:7px"></span>
+                                        <span class="glyphicon glyphicon-remove text-danger" style="padding:7px"></span>
                                     </template>
                                 </div>
                             </div>
