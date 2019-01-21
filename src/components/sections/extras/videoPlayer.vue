@@ -13,6 +13,29 @@
             </div>
             <div class="col-md-4">
                 <ul id="playlistBlck" class="list-group">
+                    <!-- Add another video / playlist in the current one -->
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text" name="" id="" class="form-control" placeholder="Enter the Video / Playlist url you want to add">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <span class="btn" @click="autoplay = !autoplay" >Autoplay</span> 
+                                    </span>
+                                    <template v-if="autoplay">
+                                        <span class="glyphicon glyphicon-ok" style="padding:7px"></span>
+                                    </template>
+                                    <template v-else>
+                                        <span class="glyphicon glyphicon-remove" style="padding:7px"></span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Fetched list from the URL parameters -->
                     <li v-for="(vid, index) in videoDetailsArr" :key="index" class="list-group-item" @click="playVid(vid.id, $event)" :data-id="vid.id">
                         <template v-if="vid.title">
                             <div class="media">
@@ -51,9 +74,11 @@ export default {
                 url: configArr.Global.url,
                 key: configArr.Global.parameters.key
             },
-
+            currentId: null,
+            videoEnded: false,
             playerFrame: null,
-            videoDetailsArr:[]
+            videoDetailsArr:[],
+            autoplay: false
         }
     },
     computed:{
@@ -89,6 +114,12 @@ export default {
                     }
                 }, 1000);
             } 
+        },
+        videoEnded(value){
+            if(value && this.autoplay) this.playNextVid();
+        },
+        autoplay(value){
+            if(value && this.videoEnded) this.playNextVid();
         }
     },
     methods:{
@@ -116,6 +147,14 @@ export default {
                     resp.items.forEach(element => {
                         if(element.snippet){
                             element.snippet.id = element.id;
+                            if(vm.videoDetailsArr.length){
+                                var response = vm.videoDetailsArr.findIndex(element11 => (element11.id == element.id));
+                                if(response < 0){
+                                    vm.videoDetailsArr.push(element.snippet);
+                                    return false;
+                                }
+                            }
+
                             vm.videoDetailsArr.push(element.snippet);
                         }
                     });
@@ -126,12 +165,41 @@ export default {
         //Play the current clicked video
         playVid(vidID, event){
             var listItem = event.target.closest('li');
+            var result = [],
+            node = listItem.parentNode.firstChild;
+
+            while ( node ) {
+                if ( node !== listItem && node.nodeType === Node.ELEMENT_NODE ){
+                    if(node.classList.contains('active')) node.classList.remove('active');
+                }
+                
+                node = node.nextElementSibling || node.nextSibling;
+            }
+
+            if(listItem.classList.contains('active') == false) listItem.classList.add('active');
             this.createPlayer(vidID);
         },
 
+        //Play next video
+        playNextVid(){
+            var response = this.videoDetailsArr.findIndex(element => (element.id == this.currentId));
+
+            if(!response) response = 0;
+            response = response + 1;
+
+            var nextVid = this.videoDetailsArr[0].id;
+            if(this.videoDetailsArr[response].id) nextVid = this.videoDetailsArr[response].id;
+
+            if(nextVid){
+                var liElem = document.querySelector('[data-id="'+nextVid+'"]');
+                if(liElem) liElem.click();
+            }
+        },
+
         //Get Playlist video id's
-        createPlayer(vidId){
+        createPlayer(vidId, index){
             if(!vidId) vidId = this.videoId;
+            this.currentId = vidId;
 
             if(this.playrObj){
                 if(this.playerFrame !== null) this.playerFrame.destroy();
@@ -156,8 +224,15 @@ export default {
             this.playerFrame.playVideo();
         },
 
+        //Do actions based on current video state
         checkState(evt){
-            //console.log(evt);
+            var evntData = false;
+
+            //Video ended
+            if(evt.data == 0){
+                this.videoEnded = true;
+                if(this.autoplay) this.playNextVid();
+            }
         }
     },
     beforeMount(){
