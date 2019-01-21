@@ -232,6 +232,8 @@ export default {
             if(evt.data == 0){
                 this.videoEnded = true;
                 if(this.autoplay) this.playNextVid();
+            }else{
+                this.videoEnded = false;
             }
         }
     },
