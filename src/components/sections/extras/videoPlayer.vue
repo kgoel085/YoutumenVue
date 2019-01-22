@@ -17,7 +17,7 @@
                     <li class="list-group-item">
                         <div class="row">
                             <div class="col-md-8">
-                                <input type="text" name="" id="" class="form-control" placeholder="Enter the Video / Playlist url you want to add">
+                                <input type="text" name="" id="" class="form-control" placeholder="Enter the Video / Playlist url you want to add" v-model="userInput.url">
                             </div>
                             <div class="col-md-4">
                                 <div class="input-group">
@@ -78,7 +78,14 @@ export default {
             videoEnded: false,
             playerFrame: null,
             videoDetailsArr:[],
-            autoplay: false
+            autoplay: false,
+
+            //User Input vars
+            userInput:{
+                url: null,
+                error: false,
+                errorMsg: 'Invalid URL'
+            },
         }
     },
     computed:{
@@ -120,9 +127,37 @@ export default {
         },
         autoplay(value){
             if(value && this.videoEnded) this.playNextVid();
+        },
+        'userInput.url'(val){
+            if(val !== null) this.checkUrl(val);
         }
     },
     methods:{
+        //Valdiate the url
+        //Validate and Extracts Video ID / Playlist ID from the provided URl
+        checkUrl(url = ''){
+            var rspUrl = this.$helpers.validateUrl(url);
+
+            if(!rspUrl.success){
+                this.userInput.error = true;
+                if(rspUrl.errorMsg) this.userInput.errorMsg = rspUrl.errorMsg;
+                return false;
+            }
+
+            var queryUrl = {};
+            if(rspUrl.success && rspUrl.data){
+                this.userInput.error = false;
+
+                var urlDt = rspUrl.data;
+                if(urlDt.video) this.getVidDetails(urlDt.video);
+                if(urlDt.playlist) this.getPlaylistVideos(urlDt.playlist);
+
+                this.userInput.url = null;
+            }
+
+            return false;
+        },
+
         //Retrive all video id in a playlist
         getPlaylistVideos(val = this.playlistId, tmpArr = []){
             var vm = this;
