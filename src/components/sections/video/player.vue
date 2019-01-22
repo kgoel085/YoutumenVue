@@ -151,47 +151,28 @@ export default {
 
         //Validate and Extracts Video ID / Playlist ID from the provided URl
         checkUrl(url = ''){
-            if(!url){
+            var rspUrl = this.$helpers.validateUrl(url);
+
+            if(!rspUrl.success){
                 this.userInput.error = true;
-                this.userInput.errorMsg = 'Please provide a vaid  URL to continue';
+                if(rspUrl.errorMsg) this.userInput.errorMsg = rspUrl.errorMsg;
                 return false;
             }
 
-            var videoId = '';
-            var playlistId = '';
-            var testString = url;
+            var queryUrl = {};
+            if(rspUrl.success && rspUrl.data){
+                this.userInput.error = false;
 
-            //Chk if URl is from youtube or not 
-            var urlValid = false;
-            var urlChkRegEx = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
-            if(testString.match(urlChkRegEx)) urlValid = true;
-
-            if(!urlValid){
-                this.userInput.error = true;
-                return false;
+                var urlDt = rspUrl.data;
+                if(urlDt.video) queryUrl.v = urlDt.video;
+                if(urlDt.playlist) queryUrl.list = urlDt.playlist;
             }
 
-            // RegEx to check for either video or playlist id 
-            var video = /(?:youtube\.com.*(?:\?|&)(?:v)=|youtube\.com.*embed\/|youtube\.com.*v\/|youtu\.be\/)((?!videoseries)[a-zA-Z0-9_]*)/g;
-            var playlist = /(?:(?:\?|&)list=)((?!videoseries)[a-zA-Z0-9_]*)/g;
-
-            //Check for video
-            if(testString.match(video)) videoId = RegExp.$1;
-
-            //Check for playlist
-            if(testString.match(playlist)) playlistId = RegExp.$1;
-
-            if((videoId || playlistId) && urlValid){
-                var queryUrl = {};
-                if(videoId) queryUrl.v = videoId;
-                if(playlistId) queryUrl.list = playlistId;
-
-                if(Object.keys(queryUrl).length > 0){
-                    this.$router.push({
-                        name:'Player',
-                        query: queryUrl
-                    });
-                }
+            if(Object.keys(queryUrl).length > 0){
+                this.$router.push({
+                    name:'Player',
+                    query: queryUrl
+                });
             }
 
             return false;
