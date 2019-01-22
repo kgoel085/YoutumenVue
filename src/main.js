@@ -9,6 +9,17 @@ import {globalMix} from './helpers/global_mixins.js';
 //Vuex Object instance
 import store from './store/store'
 
+//Helper function objects
+import helpers from './classes/helpers';
+const plugin = {
+  install () {
+      Vue.helpers = helpers
+      Vue.prototype.$helpers = helpers
+  }
+}
+
+Vue.use(plugin)
+
 Vue.use(VueResource);
 Vue.http.interceptors.push(function(request, next) {
   if(!request.params['part']) request.params['part'] = 'snippet';
