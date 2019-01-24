@@ -9,6 +9,9 @@ import {globalMix} from './helpers/global_mixins.js';
 //Vuex Object instance
 import store from './store/store'
 
+//Global Filters
+import "./classes/filters";
+
 //Helper function objects
 import helpers from './classes/helpers';
 const plugin = {
@@ -18,7 +21,7 @@ const plugin = {
   }
 }
 
-Vue.use(plugin)
+Vue.use(plugin);
 
 Vue.use(VueResource);
 Vue.http.interceptors.push(function(request, next) {
