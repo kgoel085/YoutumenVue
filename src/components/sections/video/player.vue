@@ -41,8 +41,7 @@
             </template>
             <!-- If Video / Playlist id found proceed further -->
             <template v-else>
-                <p v-if="PlayerLoaded">Youtube Player Loaded</p>
-                <video-plyer :playrObj="YtPlyr.obj" :videoId="videoId" :playlistId="playlistId"></video-plyer>
+                <video-plyer :playrObj="YtPlyr.obj" :videoId="videoId" :playlistId="playlistId" v-if="PlayerLoaded"></video-plyer>
             </template>
         </template>
     </div>
