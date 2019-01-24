@@ -36,24 +36,26 @@
                     </li>
 
                     <!-- Fetched list from the URL parameters -->
-                    <li v-for="(vid, index) in videoDetailsArr" :key="index" class="list-group-item" @click="playVid(vid.id, $event)" :data-id="vid.id">
-                        <template v-if="vid.title">
-                            <div class="media">
-                                <div class="media-left">
-                                    <a href="#">
-                                        <img class="media-object" :src="vid.thumbnails.medium.url" width="140px" height="auto">
-                                    </a>
+                    <draggable v-model="videoDetailsArr" @start="drag=true" @end="drag=false">
+                        <li v-for="(vid, index) in videoDetailsArr" :key="index" class="list-group-item" @click="playVid(vid.id, $event)" :data-id="vid.id">
+                            <template v-if="vid.title">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="#">
+                                            <img class="media-object" :src="vid.thumbnails.medium.url" width="140px" height="auto">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <span class="media-heading"><strong>{{ vid.title }}</strong></span><br>
+                                        <small>{{ vid.channelTitle }}</small>
+                                    </div>
                                 </div>
-                                <div class="media-body">
-                                    <span class="media-heading"><strong>{{ vid.title }}</strong></span><br>
-                                    <small>{{ vid.channelTitle }}</small>
-                                </div>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <loader class="text-center"></loader>
-                        </template>
-                    </li>
+                            </template>
+                            <template v-else>
+                                <loader class="text-center"></loader>
+                            </template>
+                        </li>
+                    </draggable>
                 </ul>
             </div>
         </template>
@@ -63,9 +65,12 @@
 <script>
 import Loader from '../../sections/extras/loader';
 import { configArr } from '../../../classes/configuration';
+import draggable from 'vuedraggable'
+
 export default {
     components:{
-        'loader': Loader
+        'loader': Loader,
+        draggable
     },
     data(){
         return{
