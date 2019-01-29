@@ -21,8 +21,8 @@ const Search = resolve => {
 }
 
 const Player = resolve => {
-  require.ensure(['../components/sections/video/player.vue'], () => {
-      resolve(require('../components/sections/video/player.vue'));
+  require.ensure(['../components/WatchVideo.vue'], () => {
+      resolve(require('../components/WatchVideo.vue'));
   }, 'Player');
 }
 
