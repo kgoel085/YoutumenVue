@@ -107,6 +107,12 @@ export default {
         'userInput.url'(val){
             if(val !== null) this.checkUrl(val);
         },
+
+        //If autoplay is changed, emit it to the parent
+        playlistAutoPlay(val){
+            this.$emit('autoPlaychanged', val);
+        }
+
     },
     methods:{
         //Retrive all video id in a playlist

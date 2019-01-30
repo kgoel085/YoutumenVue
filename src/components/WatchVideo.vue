@@ -27,7 +27,9 @@
                     <div class="row">
                         <!-- Video Player -->
                         <div class="col-md-12">
-                            <vidPlayer :videoId="currentVidId" @VideoEnded="getNextVid" @videoLoaded="videoLoaded = true"></vidPlayer>
+                            <div class="row">
+                                <vidPlayer :videoId="currentVidId" @VideoEnded="getNextVid" @videoLoaded="videoLoaded = true"></vidPlayer>
+                            </div>
                         </div>
 
                         <div class="clearfix"></div>
@@ -37,7 +39,7 @@
                             <!-- If video is loaded -->
                             <template v-if="videoLoaded">
                                 <!-- Title -->
-                                <p v-if="vidArr.title">{{ vidArr.title }}</p>
+                                <h3 v-if="vidArr.title">{{ vidArr.title }}</h3>
 
                                 <!-- Stats -->
                                 <div class="row" v-if="Object.keys(vidArr.stats).length > 0">
@@ -68,7 +70,7 @@
 
                                 <!-- Channel details  -->
                                 <div class="row" v-if="Object.keys(vidArr.channelDetails).length > 0 ">
-                                    <div class="media">
+                                    <div class="media col-sm-12">
                                         <div class="media-left media-middle">
                                             <a href="#">
                                                 <img class="media-object" :src="vidArr.channelDetails.thumbnails.default.url " alt="" :width="vidArr.channelDetails.thumbnails.default.width+'px'" :height="vidArr.channelDetails.thumbnails.default.height+'px'">
@@ -100,7 +102,7 @@
 
                 <!-- Playlist -->
                 <div class="col-md-4">
-                    <playList :videoId="videoId" :playlistId="playlistId" :prevPlayId="prevPlayItem" :currentPlayId="currentVidId" @nextPlaylistItem="playNextVid" @currentItemDetails="showDetails"></playList>
+                    <playList :videoId="videoId" :playlistId="playlistId" :prevPlayId="prevPlayItem" :currentPlayId="currentVidId" :autoplay="autoplayVid" @nextPlaylistItem="playNextVid" @currentItemDetails="showDetails" @autoPlaychanged="autoplayVid = !autoplayVid"></playList>
                 </div>
             </div>
         </template>
@@ -143,7 +145,13 @@ export default {
             vidArr:{},
 
             //Video loaded
-            videoLoaded: false
+            videoLoaded: false,
+
+            //Video ended
+            videoEnded: false,
+
+            //Autoplay video
+            autoplayVid: true
         }
     },
     computed:{
@@ -176,6 +184,11 @@ export default {
         //Watch for user provided url
         'userInput.url'(val){
             if(val !== null) this.checkUrl(val);
+        },
+
+        //If video has ended and autoplay is triggered, play next video
+        autoplayVid(val){
+            if(val && this.videoEnded) this.getNextVid(this.currentVidId);
         }
     },
     methods:{
@@ -210,12 +223,14 @@ export default {
 
         //Play next video in playlist
         playNextVid(val){
+            this.videoEnded = false;
             if(val) this.currentVidId = val;
         },
 
-        //Ifcurrent video ends, get next one
+        //If current video ends, get next one
         getNextVid(val){
-            if(val) this.prevPlayItem = val; 
+            this.videoEnded = true;
+            if(val && this.autoplayVid) this.prevPlayItem = val; 
         },
 
         //Get details regarding current playing video
