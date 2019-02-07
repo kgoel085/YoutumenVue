@@ -8,7 +8,6 @@
             </div>
 
             <div class="col-md-12 animated" v-if="showFilters">
-                {{ selectedFilter }}
                 <div class="row">
                     <div class="col-md-3" v-for="(filters, filterType) in filterArr" :key="filterType">
                         <table class="table table-condensed">
@@ -34,12 +33,19 @@
 export default {
     data(){
         return{
-            selectedFilter:{},
+            selectedFilter:{
+                'publishedAfter': null,
+                'publishedBefore': null,
+                'type': null,
+                'videoType': null,
+                'videoDuration': null,
+                'order': null,
+            },
             filterArr:{
                 'Upload':['Last Hour', 'Today', 'This Week', 'This Month', 'This year'],
                 'Type':['Video', 'Channel', 'Playlist', 'Movie', 'Show'],
-                'Duration':['Short( < 4 Minutes )', 'Long ( > 20 Minutes )'],
-                'Sort_by':['Relevance', 'Upload date', 'View count', 'Rating']
+                'Duration':['Short( < 4 Minutes )', 'Medium ( <= 20 Minutes )','Long ( > 20 Minutes )'],
+                'Sort_by':['Relevance', 'Upload date', 'View count', 'Rating', 'Title']
             },
             showFilters: false
         }
@@ -85,6 +91,7 @@ export default {
                     currentDate.setHours(currentDate.getHours() - 1);
 
                     prevDate = this.$helpers.ISODateString(currentDate);
+                    nextDate = this.$helpers.ISODateString();
                 break;
 
                 case 2:
@@ -92,21 +99,24 @@ export default {
                     var weekstart = current.getDate() - current.getDay() +1;    
                     var weekend = weekstart + 6;       // end day is the first day + 6 
 
-                    nextDate = this.$helpers.ISODateString(new Date(current.setDate(weekstart)));  
-                    prevDate = this.$helpers.ISODateString(new Date(current.setDate(weekend)));
+                    nextDate = this.$helpers.ISODateString(new Date(current.setDate(weekend)));  
+                    prevDate = this.$helpers.ISODateString(new Date(current.setDate(weekstart)));
                 break;
 
                 case 3:
-                    var date = new Date(), y = date.getFullYear(), m = date.getMonth();
-                    var firstDay = new Date(y, m, 1);
-                    var lastDay = new Date(y, m + 1, 0);
+                    var date = new Date();
+                    date.setMonth(date.getMonth() - 1);
 
-                    nextDate = this.$helpers.ISODateString(lastDay);  
-                    prevDate = this.$helpers.ISODateString(firstDay);
+                    nextDate = this.$helpers.ISODateString(new Date());  
+                    prevDate = this.$helpers.ISODateString(date);
                 break;
 
                 case 4:
+                    var date = new Date();
+                    date.setFullYear(date.getFullYear() - 1);
 
+                    nextDate = this.$helpers.ISODateString(new Date());
+                    prevDate = this.$helpers.ISODateString(date);
                 break;
 
                 default:
@@ -115,66 +125,82 @@ export default {
                 break;
             }
 
-            console.log(nextDate, '------', prevDate);
+            var tmpObj = {};
+
+            if(prevDate) tmpObj.publishedAfter = prevDate;
+            if(nextDate) tmpObj.publishedBefore = nextDate;
+
+            if(Object.keys(tmpObj).length > 0) this.$emit('filterTriggered', tmpObj);
         },
 
         //Set Uplaod type
         setVideoType(child){
-            switch(child){
-                case 0:
+            var videoTypeVal = this.filterArr['Type'][child];
+            if(!videoTypeVal) return;
 
-                break;
+            videoTypeVal = videoTypeVal.toLocaleLowerCase();
 
-                case 1:
-
-                break;
-
-                case 2:
-
-                break;
-
-                case 3:
-
-                break;
-
-                case 4:
-
-                break;
+            if(child <= 2){
+                this.$emit('filterTriggered', {'type':videoTypeVal})
+                return false;
             }
+
+            if(videoTypeVal == 'show') videoTypeVal = 'episode';
+            this.$emit('filterTriggered', {'videoType':videoTypeVal});
         },
 
         //Set Uplaod type
         setLengthType(child){
+            var lengthVal = this.filterArr['Duration'][child];
+            if(!lengthVal) return;
+
+            var lengthValue = '';
+            
             switch(child){
                 case 0:
-
+                    lengthValue = 'short';
                 break;
 
                 case 1:
+                    lengthValue = 'medium';
+                break;
 
+                case 2:
+                    lengthValue = 'long';
                 break;
             }
+
+            if(lengthValue) this.$emit('filterTriggered', {'videoDuration': lengthValue});
         },
 
         //Set Uplaod type
         setSortype(child){
+            var sortType = this.filterArr['Sort_by'][child];
+            if(!sortType) return;
+
             switch(child){
                 case 0:
-
+                   sortType = 'relevance';
                 break;
 
                 case 1:
-
+                    sortType = 'date';
                 break;
 
                 case 2:
-
+                    sortType = 'viewCount';
                 break;
 
                 case 3:
+                    sortType = 'rating';
+                break;
 
+                case 4:
+                    sortType = 'title';
                 break;
             }
+
+            if(sortType) this.$emit('filterTriggered', {'order':sortType});
         }
 
     },
