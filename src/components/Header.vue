@@ -22,16 +22,16 @@
                 <ul class="nav navbar-nav">
 
                 </ul>
-                <form class="navbar-form navbar-left">
+                <div class="navbar-form navbar-left">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for..." v-model="searchVal">
-                        <span class="input-group-btn" @click="searchValue()">
+                        <input type="text" class="form-control" placeholder="Search for..." v-model="searchVal" @keyup.enter="searchValue">
+                        <span class="input-group-btn" @click="searchValue">
                             <button class="btn btn-default" type="button">
                                 <i class="glyphicon glyphicon-search"></i>
                             </button>
                         </span>
                     </div>
-                </form>
+                </div>
                 <ul class="nav navbar-nav navbar-right">
 
                 </ul>
