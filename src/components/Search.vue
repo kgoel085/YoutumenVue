@@ -1,7 +1,7 @@
 <template>
     <div class="searchDiv">
         <!-- Filters -->
-        <filters></filters>
+        <filters @filterTriggered="filterChanged"></filters>
         
         <div class="videoSearch">
             <div class="col-md-12">
@@ -26,12 +26,25 @@ import Filters from './sections/Filters';
 export default {
     data(){
         return {
+            selectedFilter:{
+                'publishedAfter': null,
+                'publishedBefore': null,
+                'type': null,
+                'videoType': null,
+                'videoDuration': null,
+                'order': null,
+            },
             apiParamerts: {
                 'endpoint': 'Search', 
                 'params': {'q': this.searchQuery},
                 'successCall': this.getResult
             },
             videoObj: []
+        }
+    },
+    watch:{
+        selectedFilter(val){
+            console.log(val);
         }
     },
     computed:{
@@ -72,35 +85,26 @@ export default {
         },
         setParameter(paramKey, paramVal){
             this.videoObj = [];
-
-            // var paramObj = {}
-            // paramObj[paramKey] = paramVal;
-            // paramObj['q'] = this.$route.query.searchQry;
-
-            // this.apiParamerts.params = paramObj;
             this.apiParamerts.params[paramKey] = paramVal;
+        },
+        filterChanged(val){
+            var vm = this;
+            for (var k in val){
+                //if (val.hasOwnProperty(k)) {
+                    vm.selectedFilter[k] = val[k];
 
-
-            var ytObj = new Youtube(this.apiParamerts);
-            ytObj.callAPi();            
+                    if(k == 'videoType' && val[k]){
+                        if(vm.selectedFilter['type']) vm.selectedFilter['type'] = null;
+                    }
+               // }
+            }
         }
     },
     created(){
        this.searchQuery = this.$route.query.searchQry;
     },
     mounted(){
-        var ytObj = new Youtube(this.apiParamerts);
-        ytObj.callAPi();
 
-        var vm = this;
-
-        window.onscroll = function(ev) {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                //Call API endpoint again for next record
-                 var ytObj = new Youtube(vm.apiParamerts);
-                ytObj.callAPi(); 
-            }
-        };
     },
     components:{
         'app-video': Video,
