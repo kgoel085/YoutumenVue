@@ -1,35 +1,7 @@
 <template>
     <div class="searchDiv">
         <!-- Filters -->
-        <div class="filters">
-            <div class="col-md-12">
-                <button class="btn btn-md btn-default" type="button" @click="showFilters = showFilters">
-                    <i class="glyphicon glyphicon-tasks"></i> <span>Filters</span>
-                </button>
-            </div>
-            <div class="col-md-12" v-if="showFilters">
-                <div class="row">
-                    <div class="col-md-2" v-for="(filter, index) in filterObj" :key="index">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title"><strong>{{ filter.title }}  </strong></h3>
-                            </div>
-                            <div class="panel-body">
-                                <template vif="Object.keys(filter.values).lengh > 0">
-                                    <div class="col-md-12" v-for="(valueObj, parameter) in filter.values" :key="parameter">
-                                        <template v-if="typeof valueObj == 'object'">
-                                            <p v-for="(value, valTitle) in valueObj" :key="value" @click="setParameter(parameter, value)">
-                                                {{ valTitle }}
-                                            </p>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <filters></filters>
         
         <div class="videoSearch">
             <div class="col-md-12">
@@ -49,11 +21,11 @@
 <script>
 import Youtube from '../classes/Youtube.js';
 import Video from './sections/video/index.vue';
+import Filters from './sections/Filters';
 
 export default {
     data(){
         return {
-            showFilters: false,
             apiParamerts: {
                 'endpoint': 'Search', 
                 'params': {'q': this.searchQuery},
@@ -63,14 +35,6 @@ export default {
         }
     },
     computed:{
-        filterObj(){
-            var filterArr = {};
-
-            var ytObj = new Youtube(this.apiParamerts);
-            if(ytObj.sectionObj.parameters.extra) filterArr = ytObj.sectionObj.parameters.extra;
-
-            return filterArr;
-        },
         searchQuery:{
             get(){
                 this.setParameter('q', this.$route.query.searchQry);
@@ -139,7 +103,8 @@ export default {
         };
     },
     components:{
-        'app-video': Video
+        'app-video': Video,
+        Filters
     }
 }
 </script>
