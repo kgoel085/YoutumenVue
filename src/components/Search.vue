@@ -22,89 +22,89 @@
 import Youtube from '../classes/Youtube.js';
 import Video from './sections/video/index.vue';
 import Filters from './sections/Filters';
+import {configArr} from '../classes/configuration';
 
 export default {
     data(){
         return {
-            selectedFilter:{
-                'publishedAfter': null,
-                'publishedBefore': null,
-                'type': null,
-                'videoType': null,
-                'videoDuration': null,
-                'order': null,
+            videoObj: [],
+            appliedFilters:{},
+            pageToken: null,
+
+            //Contains API call point required vars
+            config: {
+                url: configArr.Global.url,
+                key: configArr.Global.parameters.key
             },
-            apiParamerts: {
-                'endpoint': 'Search', 
-                'params': {'q': this.searchQuery},
-                'successCall': this.getResult
-            },
-            videoObj: []
-        }
-    },
-    watch:{
-        selectedFilter(val){
-            console.log(val);
         }
     },
     computed:{
         searchQuery:{
             get(){
-                this.setParameter('q', this.$route.query.searchQry);
                 return this.$route.query.searchQry;
             },
             set(value){
-                this.setParameter('q', this.$route.query.searchQry);
                 return value;
             }
         }
     },
-    methods:{
-        getResult(respObj){
-            var vm = this;
-            var response = respObj;
-
-            if(response.nextPageToken) vm.apiParamerts.params.pageToken = response.nextPageToken;
-
-            //Check for received videos
-            if(response.items){
-                var respItem = response.items;
-                respItem.forEach(function(element){
-                    if(element.snippet){
-                        var snip = element.snippet;
-
-                        element.snippet.type = 'preview';
-                        if(element.id){
-                            if(element.id.videoId) element.snippet.videoId = element.id.videoId;
-                            else if(element.id.playlistId) element.snippet.videoId = element.id.playlistId;
-                        }
-                        vm.videoObj.push(element.snippet);
-                    }
-                });
+    watch:{
+        appliedFilters(val){
+            if(val){
+                this.videoObj = [];
+                this.pageToken = null;
+                this.getResult();
             }
-        },
-        setParameter(paramKey, paramVal){
-            this.videoObj = [];
-            this.apiParamerts.params[paramKey] = paramVal;
+        }
+    },
+    methods:{
+        getResult(){
+            var vm = this;
+            var paramArr = {'part': 'snippet', 'maxResults': 15, 'order': 'relevance', 'q': this.searchQuery, 'key': this.config.key,'type':'video', 'videoType':'any'};
+            if(Object.keys(this.appliedFilters).length > 0){
+                for(var filter in this.appliedFilters){
+                    
+                    if(!this.appliedFilters[filter]) delete paramArr[filter];
+                    if(this.appliedFilters[filter]) paramArr[filter] = this.appliedFilters[filter];
+                    
+                }
+            }
+
+            if(this.pageToken && this.pageToken !== null) paramArr['pageToken'] = this.pageToken;
+
+            this.$http.get(this.config.url+'/search', {'params': paramArr}).then(response => response.json()).then(resp => {
+                if(resp.nextPageToken) this.pageToken = resp.nextPageToken;
+
+                if(resp.items && resp.items.length > 0){
+                    var respItems = resp.items;
+
+                    respItems.forEach(element => {
+                        if(element.snippet){
+                            //Get Video ID
+                            if(element.id.videoId) element.snippet.videoId = element.id.videoId;
+
+                            vm.videoObj.push(element.snippet);
+                        }
+                    });
+                }
+            });
         },
         filterChanged(val){
-            var vm = this;
-            for (var k in val){
-                //if (val.hasOwnProperty(k)) {
-                    vm.selectedFilter[k] = val[k];
-
-                    if(k == 'videoType' && val[k]){
-                        if(vm.selectedFilter['type']) vm.selectedFilter['type'] = null;
-                    }
-               // }
-            }
+            this.appliedFilters = Object.assign({}, this.appliedFilters, val);
         }
     },
     created(){
        this.searchQuery = this.$route.query.searchQry;
     },
     mounted(){
+        var vm = this;
 
+        window.onscroll = function(ev) {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                vm.getResult();
+            }
+        };
+        if(this.searchQuery) this.getResult();
     },
     components:{
         'app-video': Video,
