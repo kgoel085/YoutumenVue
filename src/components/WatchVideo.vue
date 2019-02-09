@@ -112,7 +112,7 @@
 <script>
 import { configArr } from '../classes/configuration';
 import Loader from './sections/extras/loader';
-import vidPlayer from './sections/player';
+import vidPlayer from './sections/Player';
 import playList from './sections/Playlist';
 
 export default {
