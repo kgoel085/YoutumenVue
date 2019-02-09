@@ -9,16 +9,25 @@
 
             <div class="col-md-12 animated" v-if="showFilters">
                 <div class="row">
-                    <div class="col-md-3" v-for="(filters, filterType) in filterArr" :key="filterType">
+                    <div class="col-md-3" v-for="(filters, filterKey) in filterArr" :key="filterKey">
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
-                                    <th>{{ filterType.replace('_', ' ') }}</th>
+                                    <th>{{ filters.replace('_', ' ') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, itemIndex) in filters" :key="itemIndex">
-                                    <td class="filterItem" @click="setFilter(filterType, itemIndex)">{{ item }}</td>
+                                <tr v-for="(item, itemIndex) in filterOptions[filterKey]" :key="itemIndex" :data-filItem="filterKey+'___'+itemIndex">
+                                    <td class="filterItem">
+                                        <div class="row">
+                                            <div class="col-sm-10" @click="setFilter(filterKey, itemIndex)">
+                                                <span>{{ item }}</span>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button class="btn btn-block showButton" @click="removeFilter(filterKey, itemIndex)" > X </button>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -33,50 +42,113 @@
 export default {
     data(){
         return{
-            selectedFilter:{
-                'publishedAfter': null,
-                'publishedBefore': null,
-                'type': null,
-                'videoType': null,
-                'videoDuration': null,
-                'order': null,
-            },
-            filterArr:{
-                'Upload':['Last Hour', 'Today', 'This Week', 'This Month', 'This year'],
-                'Type':['Video', 'Channel', 'Playlist', 'Movie', 'Show'],
-                'Duration':['Short( < 4 Minutes )', 'Medium ( <= 20 Minutes )','Long ( > 20 Minutes )'],
-                'Sort_by':['Relevance', 'Upload date', 'View count', 'Rating', 'Title']
-            },
-            showFilters: false
+            //Trigger filters by a button click or show filters by default
+            showFilters: false,
+
+            //Stores all the selected/active filters
+            selectedFilter:{},
+            
+            //Main filter object. Add new filters here
+            filterArr:['Upload','Type','Duration','Sort_by'],
+
+            //Main filters options. Add new filter options here
+            filterOptions:[
+                ['Last Hour', 'Today', 'This Week', 'This Month', 'This year'],
+                ['Video', 'Channel', 'Playlist', 'Movie', 'Show'],
+                ['Short( < 4 Minutes )', 'Medium ( <= 20 Minutes )','Long ( > 20 Minutes )'],
+                ['Relevance', 'Upload date', 'View count', 'Rating', 'Title'],
+            ],
+
+        }
+    },
+    watch:{
+        //Emit new filter object, when user clicks new one
+        selectedFilter(val){
+            this.$emit('filterTriggered', val);
         }
     },
     computed:{
+        //Decides whether to show filter trigger button or not
         showButton(){
             if(!this.buttonEnabled) this.showFilters = true;
             return this.buttonEnabled;
         }
     },
     methods:{
-        //Set filter arr valeus based on the event
-        setFilter(parent, child){
+        //Set active filters
+        setActiveFilters(parent, child){
+            var listItem = document.querySelector('tr[data-filItem="'+parent+'___'+child+'"]');
+
+            if (typeof(listItem) != 'undefined' && listItem != null){
+                var result = [],
+                node = listItem.parentNode.firstChild;
+
+                while ( node ) {
+                    if ( node !== listItem && node.nodeType === Node.ELEMENT_NODE ){
+                        if(node.firstChild.classList.contains('active')) node.firstChild.classList.remove('active');
+                    }
+                    
+                    node = node.nextElementSibling || node.nextSibling;
+                }
+
+                if(listItem.firstChild.classList.contains('active') == false) listItem.firstChild.classList.add('active');
+            }
+        },
+
+        //Remove clicked filter
+        removeFilter(parent, child){
             if(this.filterArr[parent]){
+                var selFilter = this.selectedFilter;
                 switch(parent){
-                    case 'Upload':
-                        if(this.filterArr[parent][child]) this.setUploadTime(child);
+                    case 0:
+                        if(this.selectedFilter['publishedBefore']) this.selectedFilter['publishedBefore'] = null;
+                        if(this.selectedFilter['publishedAfter']) this.selectedFilter['publishedAfter'] = null;
                     break;
 
-                    case 'Type':
-                        if(this.filterArr[parent][child]) this.setVideoType( child);
+                    case 1:
+                        if(this.selectedFilter['type']) this.selectedFilter['type'] = null;
+                        if(this.selectedFilter['videoType']) this.selectedFilter['videoType'] = null;
                     break;
 
-                    case 'Duration':
-                       if(this.filterArr[parent][child]) this.setLengthType(child);
+                    case 2:
+                        if(this.selectedFilter['videoDuration']) this.selectedFilter['videoDuration'] = null;
                     break;
 
-                    case 'Sort_by':
-                        if(this.filterArr[parent][child]) this.setSortype(child);
+                    case 3:
+                        if(this.selectedFilter['order']) this.selectedFilter['order'] = null;
                     break;
                 }
+
+                var listItem = document.querySelector('tr[data-filItem="'+parent+'___'+child+'"] td');
+                if(listItem && listItem.classList.contains('active')) listItem.classList.remove('active');
+                
+                this.selectedFilter = Object.assign({}, this.selectedFilter, selFilter);
+            }
+        },
+
+        //Set filter arr valeus based on the event
+        setFilter(parent, child){
+            if(this.filterArr[parent] && this.filterOptions[parent][child]){
+                switch(parent){
+                    case 0:
+                        this.setUploadTime(child);
+                    break;
+
+                    case 1:
+                        this.setVideoType(parent, child);
+                    break;
+
+                    case 2:
+                       this.setLengthType(child);
+                    break;
+
+                    case 3:
+                        this.setSortype(child);
+                    break;
+                }
+
+                //Set current filter as active
+                this.setActiveFilters(parent, child);
             }
         },
 
@@ -130,29 +202,31 @@ export default {
             if(prevDate) tmpObj.publishedAfter = prevDate;
             if(nextDate) tmpObj.publishedBefore = nextDate;
 
-            if(Object.keys(tmpObj).length > 0) this.$emit('filterTriggered', tmpObj);
+            if(Object.keys(tmpObj).length > 0){
+                this.selectedFilter = Object.assign({}, this.selectedFilter, tmpObj);
+               // this.$emit('filterTriggered', tmpObj);
+            }
         },
 
         //Set Uplaod type
-        setVideoType(child){
-            var videoTypeVal = this.filterArr['Type'][child];
+        setVideoType(parent, child){
+            var videoTypeVal = this.filterOptions[parent][child]; 
             if(!videoTypeVal) return;
 
             videoTypeVal = videoTypeVal.toLocaleLowerCase();
+            if(videoTypeVal == 'show') videoTypeVal = 'episode';
 
-            if(child <= 2){
-                this.$emit('filterTriggered', {'type':videoTypeVal})
-                return false;
+            var tmpObj = {'type' : videoTypeVal, 'videoType': null};
+            if(child > 2){
+                tmpObj = {'videoType' : videoTypeVal, 'type': 'video'};
             }
 
-            if(videoTypeVal == 'show') videoTypeVal = 'episode';
-            this.$emit('filterTriggered', {'videoType':videoTypeVal});
+            this.selectedFilter = Object.assign({}, this.selectedFilter, tmpObj);
         },
 
         //Set Uplaod type
         setLengthType(child){
-            var lengthVal = this.filterArr['Duration'][child];
-            if(!lengthVal) return;
+            //if(!child) return;
 
             var lengthValue = '';
             
@@ -170,13 +244,16 @@ export default {
                 break;
             }
 
-            if(lengthValue) this.$emit('filterTriggered', {'videoDuration': lengthValue});
+            if(lengthValue){
+                this.selectedFilter = Object.assign({}, this.selectedFilter, {'videoDuration': lengthValue});
+                //this.$emit('filterTriggered', {'videoDuration': lengthValue});
+            }
         },
 
         //Set Uplaod type
         setSortype(child){
-            var sortType = this.filterArr['Sort_by'][child];
-            if(!sortType) return;
+           //if(!child) return;
+            var sortType = '';
 
             switch(child){
                 case 0:
@@ -200,7 +277,10 @@ export default {
                 break;
             }
 
-            if(sortType) this.$emit('filterTriggered', {'order':sortType});
+            if(sortType){
+                this.selectedFilter = Object.assign({}, this.selectedFilter, {'order': sortType});
+                //this.$emit('filterTriggered', {'order':sortType});
+            }
         }
 
     },
@@ -222,5 +302,19 @@ export default {
     }
     .filterItem:hover{
        color:#000;
+    }
+
+    .filterItem.active .showButton{
+        display: block;
+    }
+
+    .active{
+        color:#000;
+        background-color:#ccc
+    }
+
+    .showButton{
+        display: none;
+        padding:0px;
     }
 </style>
