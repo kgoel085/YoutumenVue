@@ -58,5 +58,36 @@ export default{
             + pad(d.getUTCHours())+':'
             + pad(d.getUTCMinutes())+':'
             + pad(d.getUTCSeconds())+'Z';
+    },
+
+    //Format youtube provided video duration
+    formatVideoLength(time = null){
+        if(time == null) return ;
+    
+        var a = time.match(/\d+H|\d+M|\d+S/g);
+        var result = 0;
+    
+        var d = { 'H': 3600, 'M': 60, 'S': 1 };
+        var num;
+        var type;
+    
+        for (var i = 0; i < a.length; i++) {
+            num = a[i].slice(0, a[i].length - 1);
+            type = a[i].slice(a[i].length - 1, a[i].length);
+    
+            result += parseInt(num) * d[type];
+        }
+
+        //Format seconds to actual time
+        d = Number(result);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor(d % 3600 / 60);
+        var s = Math.floor(d % 3600 % 60);
+
+        var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+        var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+        var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+        return hDisplay + mDisplay + sDisplay;
     }
+
 }
