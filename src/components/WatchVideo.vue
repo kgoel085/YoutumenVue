@@ -176,7 +176,7 @@ export default {
 
         //If Detail arr has something
         detailsFound(){
-            if(this.vidArr !== null && Object.keys(this.vidArr).length > 0) return true;
+            if(this.currentVidId !== null) return true;
             return false;
         }
     },
