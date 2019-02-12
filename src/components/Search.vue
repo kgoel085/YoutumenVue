@@ -7,7 +7,7 @@
             <div class="col-md-12">
                 <template v-if="Object.keys(videoObj).length > 0">
                     <p>Showing results for "<strong>{{ searchQuery }}</strong>"</p>
-                    <app-video v-for="(video, index) in videoObj" :key="index" :videoObj="video" :videoType="video.type"></app-video>
+                    <app-video v-for="(video, index) in videoObj" :key="index" :videoObj="video"></app-video>
                 </template>
 
                 <template v-else>
@@ -19,8 +19,7 @@
 </template>
 
 <script>
-import Youtube from '../classes/Youtube.js';
-import Video from './sections/video/index.vue';
+import Video from './sections/Video';
 import Filters from './sections/Filters';
 import {configArr} from '../classes/configuration';
 
@@ -74,7 +73,6 @@ export default {
 
             this.$http.get(this.config.url+'/search', {'params': paramArr}).then(response => response.json()).then(resp => {
                 if(resp.nextPageToken) this.pageToken = resp.nextPageToken;
-
                 if(resp.items && resp.items.length > 0){
                     var respItems = resp.items;
 
@@ -82,6 +80,9 @@ export default {
                         if(element.snippet){
                             //Get Video ID
                             if(element.id.videoId) element.snippet.videoId = element.id.videoId;
+
+                            //Get Playlist ID
+                            if(element.id.playlistId) element.snippet.playlistId = element.id.playlistId;
 
                             vm.videoObj.push(element.snippet);
                         }
