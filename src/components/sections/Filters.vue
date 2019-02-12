@@ -7,7 +7,7 @@
                 </button>
             </div>
 
-            <div class="col-md-12 animated" v-if="showFilters">
+            <div class="col-md-12 animated" v-show="showFilters">
                 <div class="row">
                     <div class="col-md-3" v-for="(filters, filterKey) in filterArr" :key="filterKey">
                         <table class="table table-condensed">
