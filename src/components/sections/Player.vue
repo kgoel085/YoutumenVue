@@ -25,7 +25,6 @@
             </template>
             <template v-else>
                 <loader></loader>
-                <p class="alert alert-info"> Please select a video to play </p>
             </template>
         </template>
     </div>
@@ -38,7 +37,7 @@ export default {
     data(){
         return{
             // Youtube Player Obj
-            playerLoading: true,
+            //playerLoading: true,
             YtPlyr:{
                 obj: null,
                 checkVar: 0
@@ -70,6 +69,12 @@ export default {
 
         currentId(){
             return this.videoId
+        },
+
+        playerLoading(){
+            if(this.YtPlyr.obj !== null) return false;
+
+            return true;
         }
     },
     watch:{
@@ -87,7 +92,7 @@ export default {
         videoId(val){
             if(val){
                 //If player is already set up destroy it 
-                if(this.playerFrame !== null) this.playerFrame.destroy();
+                //if(this.playerFrame !== null) this.playerFrame.destroy();
                 
                 //Create new one with new video id
                 this.createPlayer(val);
@@ -108,7 +113,6 @@ export default {
                     vm.YtPlyr.checkVar = setTimeout(() => {
                         if(window.YT.Player){
                             //Show user player is loaded and than proceed
-                            vm.playerLoading = false;
                             setTimeout(() => {
                                 vm.YtPlyr.obj = window.YT.Player;
                                 vm.createPlayer();
