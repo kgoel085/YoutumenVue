@@ -54,6 +54,13 @@ export default {
                 this.pageToken = null;
                 this.getResult();
             }
+        },
+        searchQuery(val){
+            if(val){
+                this.searchQuery = val;
+                this.videoObj = [];
+                this.getResult();
+            }
         }
     },
     methods:{
