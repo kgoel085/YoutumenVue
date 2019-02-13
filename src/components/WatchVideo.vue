@@ -28,7 +28,7 @@
                         <!-- Video Player -->
                         <div class="col-md-12">
                             <div class="row">
-                                <vidPlayer :videoId="currentVidId" @VideoEnded="getNextVid" @videoLoaded="videoLoaded = true"></vidPlayer>
+                                <vidPlayer :videoId="currentVidId" @VideoEnded="getNextVid" @videoLoaded="videoLoaded = true" :key="currentVidId"></vidPlayer>
                             </div>
                         </div>
 
