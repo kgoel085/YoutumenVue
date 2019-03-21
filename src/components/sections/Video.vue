@@ -21,18 +21,10 @@
 </template>
 
 <script>
-import {configArr} from '../../classes/configuration';
-
 export default {
     data(){
         return{
-            videoLength: null,
-
-            //Contains API call point required vars
-            config: {
-                url: configArr.Global.url,
-                key: configArr.Global.parameters.key
-            },
+            videoLength: null
         }
     },
     computed:{

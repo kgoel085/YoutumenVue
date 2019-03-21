@@ -21,20 +21,13 @@
 <script>
 import Video from './sections/Video';
 import Filters from './sections/Filters';
-import {configArr} from '../classes/configuration';
 
 export default {
     data(){
         return {
             videoObj: [],
             appliedFilters:{},
-            pageToken: null,
-
-            //Contains API call point required vars
-            config: {
-                url: configArr.Global.url,
-                key: configArr.Global.parameters.key
-            },
+            pageToken: null
         }
     },
     computed:{

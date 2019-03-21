@@ -52,19 +52,12 @@
 </template>
 
 <script>
-import { configArr } from '../../classes/configuration';
 import Loader from './extras/loader';
 import draggable from 'vuedraggable'
 
 export default {
     data(){
         return{
-            //Contains API call point required vars
-            config: {
-                url: configArr.Global.url,
-                key: configArr.Global.parameters.key
-            },
-
             //User Input vars
             userInput:{
                 url: null,

@@ -110,7 +110,6 @@
 </template>
 
 <script>
-import { configArr } from '../classes/configuration';
 import Loader from './sections/extras/loader';
 import vidPlayer from './sections/Player';
 import playList from './sections/Playlist';
@@ -118,12 +117,6 @@ import playList from './sections/Playlist';
 export default {
     data(){
         return{
-            //Contains API call point required vars
-            config: {
-                url: configArr.Global.url,
-                key: configArr.Global.parameters.key
-            },
-
             // Video & Playlist vars
             videoId: null,
             playlistId: null,
