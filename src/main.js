@@ -52,8 +52,8 @@ router.afterEach((to, from) => {
 
 Vue.config.productionTip = false
 
-//Global Mixins - Currently disabled and using Vuex to manage response
-//Vue.mixin(globalMix);
+//Global Mixins - Assign common global vars for components here
+Vue.mixin(globalMix);
 
 /* eslint-disable no-new */
 new Vue({
