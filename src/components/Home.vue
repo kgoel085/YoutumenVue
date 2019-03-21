@@ -1,77 +1,70 @@
 <template>
     <div class="row">
-        <app-category v-for="(category, index) in dataObj.categories" :key="index" :catObj="category"></app-category>
+        <template v-if="Object.keys(categoryIds).length > 0">
+            <app-category v-for="(category, index) in categoryIds" :key="index" :catId="category"></app-category>
+        </template>
+        <template else>
+            <loader class="text-center"></loader>
+        </template>
+        
     </div>
 </template>
 
 <script>
-import Category from './sections/category/index';
+import Category from './sections/Channel';
+import Loader from './sections/extras/loader';
+
 export default {
     data(){
         return{
-            dataObj: {
-                categories: [],
-                catCount:{
-                    total:0,
-                    current: 0
-                }
+            categoryIds:[],
+            pageToken: null,
+            catCount:{
+                total:0,
+                current: 0
             }
-        }
-    },
-    computed:{
-        respObj(){
-            return this.$store.getters.GET_CURRENT_API_RESPONSE;
         }
     },
     methods:{
-        getResult(respObj){
+        getResult(){
             var vm = this;
-            var response = respObj.response;
+            var paramArr = {'chart': 'mostpopular', 'maxResults': 5, 'fields': 'nextPageToken,pageInfo,items(snippet/channelId)', 'key': this.config.key};
 
-            //Check for received videos
-            if(response.items){
-                var respItem = response.items;
-                respItem.forEach(function(element){
-                    if(element.snippet){
-                        var snip = element.snippet;
+            if(this.pageToken && this.pageToken !== null) paramArr['pageToken'] = this.pageToken;
 
-                        //Get Channel ID
-                        if(snip.channelId){
-                            var response = vm.dataObj.categories.find(element => (element.value == snip.channelId));
-                            if(!response){
-                                var tmpArr = {};
-                                tmpArr['channelId'] = snip.channelId;
-                                tmpArr['type'] = 'channel';
-                                tmpArr['view'] = 'playlist';
+            this.$http.get(this.config.url+'/videos', {'params': paramArr}).then(response => response.json()).then(resp => {
+                if(resp.nextPageToken) this.pageToken = resp.nextPageToken;
+                if(resp.items && resp.items.length > 0){
+                    var respItems = resp.items;
 
-                                vm.dataObj.categories.push(tmpArr);
+                    respItems.forEach(element => {
+                        if(element.snippet){
+
+                            //If channel id not already fetched
+                            if(element.snippet.channelId){
+                                if(jQuery.inArray(element.snippet.channelId, vm.categoryIds) < 0){
+                                    vm.categoryIds.push(element.snippet.channelId);
+                                }
                             }
                         }
-                    }
-                });
-            }
-        }
-    },
-    watch:{
-        respObj(obj){
-            if(!obj){
-                this.$store.dispatch('CALL_API', this.$route.name);
-                return false;
-            }
-            this.getResult(obj);
+                    });
+                }
+            });
         }
     },
     mounted(){
         var vm = this;
+        if(vm.categoryIds.length == 0) vm.getResult();
 
         window.onscroll = function(ev) {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                vm.$store.dispatch('CALL_API', vm.$route.name);
+                vm.getResult();
             }
         };
     },
     components:{
-        'app-category': Category
+        'app-category': Category,
+        Loader
     }
 }
 </script>
