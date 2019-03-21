@@ -44,7 +44,7 @@
                                 <!-- Stats -->
                                 <div class="row" v-if="Object.keys(vidArr.stats).length > 0">
                                     <div class="col-md-6">
-                                        <p>{{ vidArr.stats.viewCount | currency }} Views</p>
+                                        <p>{{ vidArr.stats.viewCount | subscriberCount }} Views</p>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row">
@@ -81,7 +81,7 @@
                                             <small>Published on {{ vidArr.channelDetails.publishedAt | dateTime }}</small>
                                         </div>
                                         <div class="media-right media-middle">
-                                            <button type="button" class="btn btn-lg btn-block btn-default">Current Subscribers - {{ vidArr.channelDetails.stats.subscriberCount }} </button>
+                                            <button type="button" class="btn btn-lg btn-block btn-default">Current Subscribers - {{ vidArr.channelDetails.stats.subscriberCount | subscriberCount }} </button>
                                         </div>
                                     </div>
                                 </div>
