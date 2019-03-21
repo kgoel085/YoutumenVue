@@ -1,11 +1,26 @@
 import Vue from "vue"
 
 //Formats number in correct comma seperated format
-Vue.filter('currency', function(value){
-    if(!value) return '';
+Vue.filter('subscriberCount', function(value){
+    // if(!value) return '';
 
-    value = value.toString();
-    return value.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+    // value = value.toString();
+    // return value.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+
+    // Nine Zeroes for Billions
+    return Math.abs(Number(value)) >= 1.0e+9
+    
+    ? (Math.abs(Number(value)) / 1.0e+9).toFixed(0) + "B"
+    // Six Zeroes for Millions 
+    : Math.abs(Number(value)) >= 1.0e+6
+
+    ? (Math.abs(Number(value)) / 1.0e+6).toFixed(0) + "M"
+    // Three Zeroes for Thousands
+    : Math.abs(Number(value)) >= 1.0e+3
+
+    ? (Math.abs(Number(value)) / 1.0e+3).toFixed(0) + "K"
+
+    : Math.abs(Number(value));
 });
 
 //Format api returned date into readble format
