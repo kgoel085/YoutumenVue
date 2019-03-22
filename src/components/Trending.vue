@@ -1,68 +1,50 @@
 <template>
     <div class="row">
-        <app-video v-for="(video, index) in dataObj.videos" :key="index" :videoObj="video" :videoType="video.type"></app-video>
+        <app-video v-for="(video, index) in videos" :key="index" :videoId="video"></app-video>
     </div>
     
 </template>
 
 <script>
-import Video from './sections/video/index.vue';
+import Video from './sections/Video';
+import Loader from './sections/Loader';
+
 export default {
     data(){
         return{
-            dataObj: {
-                categories: [],
-                videos: [],
-                videoCount:{
-                    total:0,
-                    current: 0
-                }
-            }
+            videos: [],
+            pageToken: null,
         }
     },
     computed:{
-        respObj(){
-            return this.$store.getters.GET_CURRENT_API_RESPONSE;
-        }
+        
     },
     methods:{
-        getResult(respObj){
+        getResult(){
             var vm = this;
-            var response = respObj.response;
+            var paramArr = {'chart': 'mostpopular', 'maxResults': 10, 'key': this.config.key};
 
-            //Check for received videos
-            if(response.items){
-                var respItem = response.items;
-                respItem.forEach(function(element){
-                    if(element.snippet){
-                        var snip = element.snippet;
+            if(this.pageToken && this.pageToken !== null) paramArr['pageToken'] = this.pageToken;
 
-                        //Get Channel ID
-                        if(snip.channelId && vm.dataObj.categories.length < 5) vm.dataObj.categories.push(snip.channelId);
+            this.$http.get(this.config.url+'/videos', {'params': paramArr}).then(response => response.json()).then(resp => {
+                if(resp.nextPageToken) this.pageToken = resp.nextPageToken;
+                if(resp.items && resp.items.length > 0){
+                    var respItems = resp.items;
 
-                        element.snippet.type = 'preview';
-                        vm.dataObj.videos.push(element.snippet);
-                    }
-                });
-            }
-        }
-    },
-    watch:{
-        respObj(obj){
-            if(!obj){
-                this.$store.dispatch('CALL_API', this.$route.name);
-                return false;
-            }
-            this.getResult(obj);
+                    respItems.forEach(element => {
+                        if(element.id) vm.videos.push(element.id);
+                    });
+                }
+            });
         }
     },
     mounted(){
         var vm = this;
+        if(vm.videos.length == 0) vm.getResult();
 
         window.onscroll = function(ev) {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-                //Call API endpoint again for next record
-                vm.$store.dispatch('CALL_API', vm.$route.name);
+                vm.getResult();
             }
         };
     },

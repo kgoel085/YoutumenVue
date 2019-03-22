@@ -22,7 +22,7 @@
             </div>
             <div class="panel-body">
                 <template v-if="!vidView && playlistId !== null">
-                    <PlaylistCarousel :playlistId="playlistId"></PlaylistCarousel>
+                    <vuevideo :playlistId="playlistId"></vuevideo>
                 </template>
             </div>
         </div>
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import PlaylistCarousel from '../sections/Carousel.vue';
+import Video from './Video';
 
 export default {
     data(){
@@ -100,7 +100,7 @@ export default {
         }
     },
     components:{
-        PlaylistCarousel
+        'vuevideo': Video
     }
 }
 </script>

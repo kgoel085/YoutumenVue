@@ -7,7 +7,15 @@
             <div class="col-md-12">
                 <template v-if="Object.keys(videoObj).length > 0">
                     <p>Showing results for "<strong>{{ searchQuery }}</strong>"</p>
-                    <app-video v-for="(video, index) in videoObj" :key="index" :videoObj="video"></app-video>
+                    <div class="col-md-12" v-for="(video, index) in videoObj" :key="index">
+                        <template v-if="video.videoId || video.playlistId">
+                            <app-video :videoId="video.videoId" :playlistId="video.playlistId" :maxResults=4></app-video>
+                        </template>
+                        <tempalte v-else>
+                            <app-channel :catId="video.channelId" :maxResults=4></app-channel>
+                        </tempalte>
+                    </div>
+                    
                 </template>
 
                 <template v-else>
@@ -20,6 +28,7 @@
 
 <script>
 import Video from './sections/Video';
+import Channel from './sections/Channel';
 import Filters from './sections/Filters';
 
 export default {
@@ -75,17 +84,15 @@ export default {
                 if(resp.nextPageToken) this.pageToken = resp.nextPageToken;
                 if(resp.items && resp.items.length > 0){
                     var respItems = resp.items;
-
+                    
                     respItems.forEach(element => {
-                        if(element.snippet){
-                            //Get Video ID
-                            if(element.id.videoId) element.snippet.videoId = element.id.videoId;
+                        var tmpObj = {};
+                        //Get Video OR Playlist ID
+                        if(element.id.videoId) tmpObj['videoId'] = element.id.videoId;
+                        else if(element.id.playlistId) tmpObj['playlistId'] = element.id.playlistId;
+                        else if(element.id.channelId) tmpObj['channelId'] = element.id.channelId;
 
-                            //Get Playlist ID
-                            if(element.id.playlistId) element.snippet.playlistId = element.id.playlistId;
-
-                            vm.videoObj.push(element.snippet);
-                        }
+                        vm.videoObj.push(tmpObj);
                     });
                 }
             });
@@ -109,6 +116,7 @@ export default {
     },
     components:{
         'app-video': Video,
+        'app-channel': Channel,
         Filters
     }
 }
