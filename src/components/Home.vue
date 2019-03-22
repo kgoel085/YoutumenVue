@@ -12,7 +12,7 @@
 
 <script>
 import Category from './sections/Channel';
-import Loader from './sections/extras/loader';
+import Loader from './sections/Loader';
 
 export default {
     data(){

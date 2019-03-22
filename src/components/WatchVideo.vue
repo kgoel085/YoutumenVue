@@ -110,7 +110,7 @@
 </template>
 
 <script>
-import Loader from './sections/extras/loader';
+import Loader from './sections/Loader';
 import vidPlayer from './sections/Player';
 import playList from './sections/Playlist';
 

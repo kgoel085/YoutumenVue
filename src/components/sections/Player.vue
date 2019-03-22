@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import Loader from './extras/loader';
+import Loader from '../sections/Loader';
 
 export default {
     data(){
