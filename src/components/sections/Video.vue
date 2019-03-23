@@ -2,42 +2,30 @@
     <div class="col-md-12">
 
         <!-- If playlist is provided -->
-        <template v-if="playlistId">
-            <div class='carousel-view' v-if="slides.length > 0  ">
-                <vue-carousel class="carousel" :dots="false" :rewind="false" :items="4" :nav="false" :key="screenSize">
-                    <template slot="next"><button :class="'carousel-next btn btn-default btn-circle'"> <i class="glyphicon glyphicon-chevron-left"></i> </button></template>
-
-                    <div class="thumbnail" v-for="(slide, index) in slides" :key="index" @click="showVideo(slide.videoId, playlistId)">
-                        <img :src="getImage(slide.thumbnails)" :alt="slide.title" :style="{width: '100%', height: currentHeight+'px'}">
-
-                        <p class="caption" style="font-weight:550">{{ slide.title.substring(0,70) }}</p>
-
-                        <kbd>
-                            <small v-if="slide.statistics.viewCount">{{ slide.statistics.viewCount | subscriberCount }} Views</small>
-                        </kbd>
-                        <kbd>
-                            <small v-if="slide.statistics.likeCount">{{ slide.statistics.likeCount | subscriberCount }} Likes</small>
-                            <small v-if="slide.statistics.dislikeCount">{{ slide.statistics.dislikeCount | subscriberCount }} Dislikes</small>
-                        </kbd>
-                    </div>
-            
-                    <template slot="prev"><button :class="'carousel-prev btn btn-default btn-circle'"> <i class="glyphicon glyphicon-chevron-right"></i> </button></template>
-                </vue-carousel>
-            </div>
-        </template>
-
-        <template v-if="videoId">
-            <div class="media" @click="showVideo(slides[0].videoId)">
+        <template v-if="videoId || playlistId">
+            <div class="media" @click="showVideo(videoId, playlistId)" :class="currentClass">
                 <div class="media-left">
                     <a href="#" class="imgBlock pull-left">
                         <img class="media-object" :src="slides[0].thumbnails.medium.url">
+                        <!-- Playlist is there -->
+                        <span class="itemCount text-center" v-if="playlistId && slides[0].itemCount > 0"><span>{{slides[0].itemCount}} <br> <i class="	glyphicon glyphicon-list"></i></span></span> 
                     </a>
                 </div>
                 <div class="media-body">
                     <h4 class="media-heading">{{ slides[0].title }}</h4>
                     <span class="media-content">
-                        <p><small>{{ slides[0].channelTitle }}</small> | <small>{{ slides[0].publishedAt | dateTime}}</small></p>
-                        {{ slides[0].description.substr(0, 400) + '....' }}
+
+                        <p v-if="slides[0].channelTitle"><small>{{ slides[0].channelTitle }}</small> | <small>{{ slides[0].publishedAt | dateTime}}</small></p>
+
+                        <p v-if="slides[0].title"><small>{{ slides[0].title }}</small> </p>
+
+                        <p v-if="slides[0].description">{{ slides[0].description.substr(0, 400) + '....' }}</p>
+
+                        <template v-if="items.length > 0">
+                            <p>
+                                <small v-for="(item, indexItem) in items" :key="indexItem">{{ item }}</small>
+                            </p>
+                        </template>
                     </span>
                 </div>
             </div>
@@ -55,6 +43,7 @@ export default {
             slides: [],
             currentHeight: 0,
             videoArr: [],
+            items:[],
             pageToken: null
         }
     },
@@ -66,8 +55,16 @@ export default {
             var curId = null;
             if(this.videoId) curId = this.videoId;
             if(!curId && this.playlistId) curId = this.playlistId;
+            if(!curId && this.channelId) curId = this.channelId;
 
             return curId;
+        },
+        currentClass(){
+            var currentCLass = 'video';
+            if(this.playlistId) currentCLass = 'playlist';
+            if(this.channelId) currentCLass = 'channel';
+
+            return currentCLass;
         }
     },
     watch:{
@@ -77,25 +74,40 @@ export default {
     },
     methods: {
         //Get all the items in the playlist
+        getPlaylist(){
+            var vm = this;
+
+            var paramArr = {'part': 'snippet,contentDetails', 'maxResults': this.maxResults, 'key': this.config.key, 'id': this.currentId};
+
+            this.$http.get(this.config.url+'/playlists', {'params': paramArr}).then(response => response.json()).then(resp => {
+                if(resp.items && resp.items.length > 0){
+                    var respItems = resp.items;
+                    
+                    respItems.forEach(element => {
+                        if(element.snippet){
+                            if(element.contentDetails.itemCount) element.snippet.itemCount = element.contentDetails.itemCount;
+
+                            vm.slides.push(element.snippet);
+                            vm.getPlaylistItems();
+                        }
+                    });
+                }
+            });
+        },
+
+        //Get all the items in the playlist
         getPlaylistItems(){
             var vm = this;
 
-            var paramArr = {'part': 'contentDetails', 'maxResults': this.maxResults, 'key': this.config.key, 'playlistId': this.currentId};
+            var paramArr = {'part': 'snippet,contentDetails', 'maxResults': 2, 'key': this.config.key, 'playlistId': this.currentId};
 
             this.$http.get(this.config.url+'/playlistItems', {'params': paramArr}).then(response => response.json()).then(resp => {
                 if(resp.items && resp.items.length > 0){
                     var respItems = resp.items;
                     
-                    var tmpArr = [];
                     respItems.forEach(element => {
-                        if(element.contentDetails.videoId){
-                            if($.inArray(element.contentDetails.videoId, tmpArr) < 0){
-                                tmpArr.push(element.contentDetails.videoId);
-                            }
-                        }
+                        if(element.snippet.title) vm.items.push(element.snippet.title);
                     });
-
-                    if(tmpArr.length > 0) vm.videoArr = tmpArr;
                 }
             });
         },
@@ -114,7 +126,7 @@ export default {
                     respItems.forEach(element => {
                         if(element.snippet){
                             if(element.id) element.snippet['videoId'] = element.id;
-                            if(element.statistics) element.snippet.statistics = element.statistics
+                            if(element.statistics) element.snippet.statistics = element.statistics;
                             vm.slides.push(element.snippet);
                         }
                     });
@@ -155,8 +167,9 @@ export default {
         }
     },
     mounted(){
-        if(this.playlistId) this.getPlaylistItems();
+        if(this.playlistId) this.getPlaylist();
         if(this.videoId) this.getVideoDetails();
+        if(this.channelId){}
     },
     props:{
         videoId:{
@@ -167,9 +180,13 @@ export default {
             type: String,
             default: null
         },
+        channelId:{
+            type: String,
+            default: null
+        },
         maxResults:{
             type: Number,
-            default: 8
+            default: 1
         }
     },
     components:{
@@ -183,37 +200,23 @@ export default {
         padding:6px
     }
 
-    .thumbnail{
-        margin-bottom: 0px;
-        background-color: #fff;
-        border: 1px solid transparent;
-        position:relative;
+    .media.playlist .imgBlock{
+        position: relative
     }
-
-    .thumbnail:hover{cursor:pointer;}
-
-    .carousel{
-        position:relative;
-    }
-
-    .btn-circle {
-        width: 40px;
-        height: 40px;
-        text-align: center;
+    .media.playlist .itemCount{
         position: absolute;
-        padding: 6px 0;
-        font-size: 12px;
-        line-height: 1.42;
-        border-radius: 100%;
+        right: 0;
+        top: 0; 
+        width: 50%;
+        height: 100%;
+        background: #020202b3
+    }
+    .media.playlist .itemCount > span{
+        position: absolute;
         top: 35%;
-        z-index: 9;
+        color: #fff;
+        font-size: 20px;
+
     }
 
-    .carousel span:first-child > button{
-        right: -2%;
-    }
-
-    .carousel span:last-child > button{
-        left: -2%;
-    }
 </style>
