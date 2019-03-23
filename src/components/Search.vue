@@ -11,9 +11,9 @@
                         <template v-if="video.videoId || video.playlistId">
                             <app-video :videoId="video.videoId" :playlistId="video.playlistId" :maxResults=4></app-video>
                         </template>
-                        <tempalte v-else>
-                            <app-channel :catId="video.channelId" :maxResults=4></app-channel>
-                        </tempalte>
+                        <template v-else>
+                            <appChannel :catId="video.channelId" :carousel="false"></appChannel>
+                        </template>
                     </div>
                     
                 </template>
@@ -28,8 +28,8 @@
 
 <script>
 import Video from './sections/Video';
-import Channel from './sections/Channel';
 import Filters from './sections/Filters';
+import Channel from './sections/Channel.vue';
 
 export default {
     data(){
@@ -116,7 +116,7 @@ export default {
     },
     components:{
         'app-video': Video,
-        'app-channel': Channel,
+        'appChannel': Channel,
         Filters
     }
 }
