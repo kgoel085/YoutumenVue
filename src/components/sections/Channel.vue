@@ -6,23 +6,32 @@
                     <template v-if="Object.keys(channelObj).length > 0">
                         <div class="media-left">
                             <a href="#">
-                                <img class="media-object" :src="channelObj.thumbnails.high.url">
+                                <img class="media-object" :class="currentClass" :src="channelObj.thumbnails.high.url">
                             </a>
                         </div>
                         <div class="media-body">
                             <h4 class="title"><strong>{{ channelObj.title.replace(/\b\w/g, function(l){ return l.toUpperCase() }) }}</strong></h4>
+                            <template v-if="!carousel">
+                                <p>
+                                    <small v-if="channelObj.statistics.subscriberCount">{{ channelObj.statistics.subscriberCount }} subscribers</small>  
+                                    <small v-if="channelObj.statistics.videoCount">{{ channelObj.statistics.videoCount }} videos</small>
+                                </p>
+
+                                <p v-if="channelObj.description">{{ channelObj.description }}</p>
+                            </template>
                         </div>
                         <div class="media-right">
                             <template v-if="channelObj.statistics">
-                                <button class="btn btn-danger" disabled>Subscribe {{ channelObj.statistics | subscriberCount }}</button>
+                                <button class="btn btn-danger" disabled>Subscribe {{ channelObj.statistics.subscriberCount | subscriberCount }}</button>
                             </template>
                         </div>
                     </template>
                 </div>
             </div>
-            <div class="panel-body">
+            <div class="panel-body" v-if="carousel">
                 <template v-if="!vidView && playlistId !== null">
-                    <vuevideo :playlistId="playlistId"></vuevideo>
+                    <!-- <vuevideo :playlistId="playlistId"></vuevideo> -->
+                    <PlaylistCarousel :playlistId="playlistId"></PlaylistCarousel>
                 </template>
             </div>
         </div>
@@ -30,7 +39,7 @@
 </template>
 
 <script>
-import Video from './Video';
+import PlaylistCarousel from '../sections/Carousel.vue';
 
 export default {
     data(){
@@ -44,21 +53,28 @@ export default {
         vidView(){
             if(this.playlistId) return false;
             return true;
+        },
+        currentClass(){
+            var curClass = '';
+            if(!this.carousel) curClass = 'noCarousel';
+
+            return curClass;
         }
     },
     methods:{
         //Get all the channel details
         channelDetails(){
             var vm = this;
-            var paramArr = {'part': 'snippet,contentDetails,statistics', 'key': this.config.key, 'id': this.currentId, 'fields':'items(id,snippet(title, publishedAt, thumbnails),statistics(hiddenSubscriberCount, subscriberCount), contentDetails)'};
+            var paramArr = {'part': 'snippet,contentDetails,statistics', 'key': this.config.key, 'id': this.currentId};
 
             this.$http.get(this.config.url+'/channels', {'params': paramArr}).then(response => response.json()).then(resp => {
                 if(resp.items && resp.items.length > 0){
                     var respItems = resp.items;
 
                     respItems.forEach(element => {
+                        if(element.statistics) element.snippet.statistics = element.statistics;
                         if(element.snippet) vm.channelObj = element.snippet;
-                        if(element.statistics.subscriberCount) vm.channelObj.statistics = element.statistics.subscriberCount;
+                        //if(element.statistics.subscriberCount) vm.channelObj.statistics = element.statistics.subscriberCount;
 
                         //If playlist is there / else get any playlist for the current channel
                         if(element.contentDetails){
@@ -97,10 +113,14 @@ export default {
         catId:{
             type: String,
             default: null
+        },
+        carousel:{
+            type: Boolean,
+            default: true
         }
     },
     components:{
-        'vuevideo': Video
+        PlaylistCarousel
     }
 }
 </script>
@@ -118,8 +138,13 @@ export default {
     .media-object{
         display: block;
         border-radius: 100%;
-        width: 32px;
+        width: 50px;
         height: auto;
+    }
+
+    /* When carousel is disabeld this clss will be added to adjust the elements */
+    .media-object.noCarousel{
+        width:100px
     }
 
     .media-body, .media-left, .media-right{
