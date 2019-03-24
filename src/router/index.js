@@ -26,6 +26,12 @@ const Player = resolve => {
   }, 'Player');
 }
 
+const Channel = resolve => {
+  require.ensure(['../components/Channel.vue'], () => {
+      resolve(require('../components/Channel.vue'));
+  }, 'Channel');
+}
+
 Vue.use(Router)
 
 export default new Router({
@@ -50,6 +56,11 @@ export default new Router({
       path:'/watch',
       name: 'Player',
       component: Player
+    },
+    {
+      path:'/channel/:id/:action?',
+      component: Channel,
+      name:'Channel'
     }
   ]
 })
