@@ -1,7 +1,7 @@
 <template>
     <div class="row">
         <template v-if="Object.keys(categoryIds).length > 0">
-            <app-category v-for="(category, index) in categoryIds" :key="index" :catId="category"></app-category>
+            <app-category v-for="(category, index) in categoryIds" :key="index" :catId="category" :carousel="true"></app-category>
         </template>
         <template else>
             <loader class="text-center"></loader>
@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import Category from './sections/Channel';
+import Category from './sections/channel/SubscribeBox';
 import Loader from './sections/Loader';
 
 export default {

@@ -12,7 +12,7 @@
                             <app-video :videoId="video.videoId" :playlistId="video.playlistId" :maxResults=4></app-video>
                         </template>
                         <template v-else>
-                            <appChannel :catId="video.channelId" :carousel="false"></appChannel>
+                            <appChannel :catId="video.channelId"></appChannel>
                         </template>
                     </div>
                     
@@ -29,7 +29,7 @@
 <script>
 import Video from './sections/Video';
 import Filters from './sections/Filters';
-import Channel from './sections/Channel.vue';
+import Channel from './sections/channel/SubscribeBox.vue';
 
 export default {
     data(){
