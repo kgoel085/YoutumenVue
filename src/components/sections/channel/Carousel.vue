@@ -12,8 +12,8 @@
                     <small v-if="slide.statistics.viewCount">{{ slide.statistics.viewCount | subscriberCount }} Views</small>
                 </kbd>
                 <kbd>
-                    <small v-if="slide.statistics.likeCount">{{ slide.statistics.likeCount | subscriberCount }} Likes</small> | 
-                    <small v-if="slide.statistics.dislikeCount">{{ slide.statistics.dislikeCount | subscriberCount }} Dislikes</small>
+                    <small v-if="slide.statistics.likeCount ">{{ (slide.statistics.likeCount > 0) ? slide.statistics.likeCount : 0 | subscriberCount }} Likes</small> | 
+                    <small v-if="slide.statistics.dislikeCount">{{ (slide.statistics.dislikeCount > 0) ? slide.statistics.dislikeCount : 0 | subscriberCount }} Dislikes</small>
                 </kbd>
             </div>
     
