@@ -41,6 +41,9 @@ export default {
     watch:{
         videoArr(val){
             if(val && typeof(val) == 'object') this.getVideoDetails();
+        },
+        slides(val){
+            if(val && typeof(val) == 'object' && val[0]) this.$emit('listLoaded', val[0]['videoId']);
         }
     },
     methods: {
