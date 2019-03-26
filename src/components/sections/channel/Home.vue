@@ -1,43 +1,47 @@
 <template>
     <div class="row">
         <div class="col-md-12" v-if="contentLoaded">
-            <template v-if="section.upload.length > 0">
+            <!-- <template v-if="section.upload.length > 0">
 
-            </template>
+            </template> -->
 
-            <template v-if="section.playlist.length > 0">
+            
                 <div class="row">
                     <!-- Channel's uploaded videos -->
                     <div class="col-md-12" v-if="playlistDetails.relatedPlaylists.uploads">
                         <PlayListBlock :catId="channelId" :playlistId="playlistDetails.relatedPlaylists.uploads"></PlayListBlock>
                     </div>
-                    <div class="col-md-12" v-for="(playlst, playlstIndex) in section.playlist" :key="playlstIndex" >
-                        <!-- If playlist is single row -->
-                        <template v-if="playlst.type = 'singlePlaylist'">
+                    <template v-if="section.playlist.length > 0">
+                        <div class="col-md-12" v-for="(playlst, playlstIndex) in section.playlist" :key="playlstIndex" >
+                            <!-- If playlist is single row -->
+                            <template v-if="playlst.type = 'singlePlaylist'">
 
-                            <!-- If style is horizontal row and more than 1 playlist id is received -->
-                            <template v-if="playlst.style = 'horizontalRow' && playlst.list.length <= 1">
-                                <PlayListBlock :catId="channelId" :playlistId="playlst.list[0]"></PlayListBlock>
+                                <!-- If style is horizontal row and more than 1 playlist id is received -->
+                                <template v-if="playlst.style = 'horizontalRow' && playlst.list">
+                                    <template v-if="playlst.list.length < 1">
+                                        <PlayListBlock :catId="channelId" :playlistId="playlst.list[0]"></PlayListBlock>
+                                    </template>
+                                </template>
+                                
+                                <!-- If style is vertical, show block rather than carousel -->
+                                <template v-if="playlst.style = 'verticalList' && playlst.list">
+                                    <template v-if="playlst.list.length > 1">
+                                        <p v-if="playlst.title">{{ playlst.title }}</p>
+                                        <VideoBlock v-for="(vidPlay, VidIndex) in playlst.list" :key="VidIndex" :playlistId="vidPlay" :maxResults=4 ></VideoBlock>
+                                    </template>
+                                    <template v-else>
+                                        <PlayListBlock :catId="channelId" :playlistId="playlst.list[0]"></PlayListBlock>
+                                    </template>
+                                </template>
                             </template>
-                            
-                            <template v-if="playlst.style = 'verticalList' && playlst.list.length < 1">
-                                <PlayListBlock :catId="channelId" :playlistId="playlst.list[0]"></PlayListBlock>
-                            </template>
-
-                            <!-- If style is vertical, show block rather than carousel -->
-                            <template v-if="playlst.style = 'verticalList' && playlst.list.length > 1">
-                                <p v-if="playlst.title">{{ playlst.title }}</p>
-                                <VideoBlock v-for="(vidPlay, VidIndex) in playlst.list" :key="VidIndex" :playlistId="vidPlay" :maxResults=4 >
-                                </VideoBlock>
-                            </template>
-                        </template>
-                    </div>
+                        </div>
+                    </template>
                 </div>
-            </template>
+            
 
-            <template v-if="section.channel.length > 0">
+            <!-- <template v-if="section.channel.length > 0">
 
-            </template>
+            </template> -->
         </div>
     </div>
 </template>
